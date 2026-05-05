@@ -8,80 +8,120 @@
 
 <style>
 body { font-family: Arial; background:#f5f5f5; margin:0; }
-.container { max-width:800px; margin:30px auto; background:#fff; padding:20px; border-radius:8px; }
+header { text-align:center; padding:20px; background:#fff; border-bottom:1px solid #ddd; }
+.logo { font-size:24px; color:#6a1b9a; font-weight:bold; }
+
+.container {
+  max-width:900px;
+  margin:20px auto;
+  background:#fff;
+  padding:20px;
+  border-radius:8px;
+}
+
+button {
+  margin-top:10px;
+  padding:8px 15px;
+  border:none;
+  background:#6a1b9a;
+  color:white;
+  cursor:pointer;
+  border-radius:4px;
+}
+
+.secondary { background:#777; }
 .hidden { display:none; }
-button { padding:8px 15px; background:#6a1b9a; color:#fff; border:none; cursor:pointer; }
+
 .msg { color:red; margin-top:10px; }
+.ok { color:green; }
 </style>
 </head>
 
 <body>
 
-<div class="container" id="login">
-<h2>Login</h2>
-<input id="user" placeholder="Usuário"><br><br>
-<input id="pass" type="password" placeholder="Senha"><br><br>
-<button onclick="login()">Entrar</button>
-<div id="msg" class="msg"></div>
+<header>
+  <div class="logo">Sofisticatto</div>
+  <div>Sistema de Produtos</div>
+</header>
+
+<!-- LOGIN -->
+<div class="container" id="login-section">
+  <h2>Login</h2>
+  <input id="login-username" placeholder="Usuário"><br>
+  <input id="login-password" type="password" placeholder="Senha"><br>
+  <button id="btn-login">Entrar</button>
+  <div id="login-msg" class="msg"></div>
 </div>
 
-<div class="container hidden" id="menu">
-<h2>Menu</h2>
-<p id="info"></p>
-<button onclick="logout()">Sair</button>
+<!-- MENU -->
+<div class="container hidden" id="menu-section">
+  <h2>Menu</h2>
+  <p id="user-info"></p>
+
+  <button onclick="alert('Consulta funcionando')">Consulta</button>
+  <button onclick="alert('Cadastro funcionando')">Cadastro</button>
+  <button id="btn-usuarios">Usuários</button>
+  <button onclick="logout()" class="secondary">Sair</button>
 </div>
 
 <script>
 const supa = supabase.createClient(
-"https://gymyltthcegplqzbujrv.supabase.co",
-"sb_publishable_yiTEjwaD0gPFz3nHb22bJQ_kTa-DWjS"
+  "https://gymyltthcegplqzbujrv.supabase.co",
+  "sb_publishable_yiTEjwaD0gPFz3nHb22bJQ_kTa-DWjS"
 );
 
-let userLogado = null;
+let usuarioLogado = null;
 
-async function login() {
-  const user = document.getElementById("user").value.trim();
-  const pass = document.getElementById("pass").value.trim();
-  const msg = document.getElementById("msg");
+function irPara(secao) {
+  document.getElementById("login-section").classList.add("hidden");
+  document.getElementById("menu-section").classList.add("hidden");
 
-  msg.textContent = "";
-
-  try {
-    const { data, error } = await supa
-      .from("usuarios")
-      .select("*")
-      .eq("username", user)
-      .maybeSingle();
-
-    if (error || !data) {
-      msg.textContent = "Usuário não encontrado";
-      return;
-    }
-
-    if (String(data.senha) !== String(pass)) {
-      msg.textContent = "Senha incorreta";
-      return;
-    }
-
-    userLogado = data;
-
-    document.getElementById("login").classList.add("hidden");
-    document.getElementById("menu").classList.remove("hidden");
-
-    document.getElementById("info").textContent =
-      "Logado como: " + data.username;
-
-  } catch (e) {
-    console.error(e);
-    msg.textContent = "Erro geral no sistema";
-  }
+  document.getElementById(secao).classList.remove("hidden");
 }
+
+document.getElementById("btn-login").onclick = async () => {
+  const user = document.getElementById("login-username").value.trim();
+  const pass = document.getElementById("login-password").value.trim();
+
+  const { data, error } = await supa
+    .from("usuarios")
+    .select("*")
+    .ilike("username", user)
+    .eq("senha", pass)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    document.getElementById("login-msg").textContent = "Erro no sistema";
+    return;
+  }
+
+  if (!data) {
+    document.getElementById("login-msg").textContent = "Usuário ou senha inválidos";
+    return;
+  }
+
+  usuarioLogado = data;
+
+  document.getElementById("user-info").textContent =
+    Logado como: ${data.username} (${data.role});
+
+  // Mostrar botão usuários só se for admin
+  if (data.role === "admin") {
+    document.getElementById("btn-usuarios").style.display = "inline-block";
+  } else {
+    document.getElementById("btn-usuarios").style.display = "none";
+  }
+
+  irPara("menu-section");
+};
 
 function logout() {
-  userLogado = null;
-  document.getElementById("login").classList.remove("hidden");
-  document.getElementById("menu").classList.add("hidden");
+  usuarioLogado = null;
+  irPara("login-section");
 }
+
+irPara("login-section");
 </script>
 
 </body>
