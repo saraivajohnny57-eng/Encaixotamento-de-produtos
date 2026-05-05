@@ -32,6 +32,9 @@ button {
 .secondary { background:#777; }
 .hidden { display:none; }
 
+table { width:100%; margin-top:10px; border-collapse:collapse; }
+td, th { border:1px solid #ddd; padding:6px; }
+
 .msg { color:red; margin-top:10px; }
 .ok { color:green; }
 </style>
@@ -58,10 +61,50 @@ button {
   <h2>Menu</h2>
   <p id="user-info"></p>
 
-  <button onclick="alert('Consulta funcionando')">Consulta</button>
-  <button onclick="alert('Cadastro funcionando')">Cadastro</button>
-  <button id="btn-usuarios">Usuários</button>
+  <button onclick="irPara('consulta-section')">Consulta</button>
+  <button onclick="irPara('cadastro-produto-section')">Cadastro Produto</button>
+  <button onclick="irPara('usuarios-section')" id="btn-usuarios">Usuários</button>
   <button onclick="logout()" class="secondary">Sair</button>
+</div>
+
+<!-- CONSULTA -->
+<div class="container hidden" id="consulta-section">
+  <h2>Consulta</h2>
+  <input id="busca">
+  <button onclick="buscar()">Buscar</button>
+
+  <table>
+    <tbody id="tabela"></tbody>
+  </table>
+
+  <button onclick="irPara('menu-section')">Voltar</button>
+</div>
+
+<!-- CADASTRO PRODUTO -->
+<div class="container hidden" id="cadastro-produto-section">
+  <h2>Cadastro Produto</h2>
+
+  <input id="codigo" placeholder="Código"><br>
+  <input id="descricao" placeholder="Descrição"><br>
+
+  <button onclick="salvarProduto()">Salvar</button>
+  <button onclick="irPara('menu-section')">Voltar</button>
+</div>
+
+<!-- USUÁRIOS -->
+<div class="container hidden" id="usuarios-section">
+  <h2>Usuários</h2>
+
+  <input id="novo-user" placeholder="Usuário"><br>
+  <input id="nova-senha" placeholder="Senha"><br>
+
+  <select id="role">
+    <option value="user">Usuário</option>
+    <option value="admin">Admin</option>
+  </select><br>
+
+  <button onclick="criarUsuario()">Criar</button>
+  <button onclick="irPara('menu-section')">Voltar</button>
 </div>
 
 <script>
@@ -72,29 +115,25 @@ const supa = supabase.createClient(
 
 let usuarioLogado = null;
 
+// NAVEGAÇÃO
 function irPara(secao) {
-  document.getElementById("login-section").classList.add("hidden");
-  document.getElementById("menu-section").classList.add("hidden");
+  ["login-section","menu-section","consulta-section","cadastro-produto-section","usuarios-section"]
+  .forEach(s => document.getElementById(s).classList.add("hidden"));
 
   document.getElementById(secao).classList.remove("hidden");
 }
 
+// LOGIN
 document.getElementById("btn-login").onclick = async () => {
   const user = document.getElementById("login-username").value.trim();
   const pass = document.getElementById("login-password").value.trim();
 
-  const { data, error } = await supa
+  const { data } = await supa
     .from("usuarios")
     .select("*")
     .ilike("username", user)
     .eq("senha", pass)
     .maybeSingle();
-
-  if (error) {
-    console.error(error);
-    document.getElementById("login-msg").textContent = "Erro no sistema";
-    return;
-  }
 
   if (!data) {
     document.getElementById("login-msg").textContent = "Usuário ou senha inválidos";
@@ -104,9 +143,9 @@ document.getElementById("btn-login").onclick = async () => {
   usuarioLogado = data;
 
   document.getElementById("user-info").textContent =
-    `Logado como: ${data.username} (${data.role})`;
+  Logado como: ${data.username} (${data.role});
 
-  // Mostrar botão usuários só se for admin
+  // controle admin
   if (data.role === "admin") {
     document.getElementById("btn-usuarios").style.display = "inline-block";
   } else {
@@ -116,11 +155,52 @@ document.getElementById("btn-login").onclick = async () => {
   irPara("menu-section");
 };
 
+// LOGOUT
 function logout() {
   usuarioLogado = null;
   irPara("login-section");
 }
 
+// CONSULTA
+async function buscar() {
+  const { data } = await supa.from("produtos").select("*");
+
+  const tabela = document.getElementById("tabela");
+  tabela.innerHTML = "";
+
+  data.forEach(p => {
+    tabela.innerHTML += `
+      <tr>
+        <td>${p.id}</td>
+        <td>${p.codigo}</td>
+        <td>${p.descricao}</td>
+      </tr>
+    `;
+  });
+}
+
+// CADASTRO PRODUTO
+async function salvarProduto() {
+  await supa.from("produtos").insert({
+    codigo: document.getElementById("codigo").value,
+    descricao: document.getElementById("descricao").value
+  });
+
+  alert("Produto salvo!");
+}
+
+// USUÁRIO
+async function criarUsuario() {
+  await supa.from("usuarios").insert({
+    username: document.getElementById("novo-user").value,
+    senha: document.getElementById("nova-senha").value,
+    role: document.getElementById("role").value
+  });
+
+  alert("Usuário criado!");
+}
+
+// INÍCIO
 irPara("login-section");
 </script>
 
