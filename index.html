@@ -23,6 +23,10 @@ body {
   padding:20px;
 }
 
+.sidebar h2 {
+  text-align:center;
+}
+
 .sidebar button {
   width:100%;
   margin-top:10px;
@@ -31,6 +35,11 @@ body {
   border:none;
   padding:10px;
   border-radius:4px;
+  cursor:pointer;
+}
+
+.sidebar button:hover {
+  background:#ab47bc;
 }
 
 /* CONTEÚDO */
@@ -45,7 +54,7 @@ body {
   border-radius:8px;
 }
 
-input {
+input, select {
   width:100%;
   padding:10px;
   margin-top:8px;
@@ -61,6 +70,7 @@ button {
 
 .hidden { display:none; }
 
+/* TABELA */
 table {
   width:100%;
   margin-top:10px;
@@ -70,6 +80,11 @@ table {
 td, th {
   border:1px solid #ddd;
   padding:8px;
+}
+
+th {
+  background:#6a1b9a;
+  color:white;
 }
 </style>
 </head>
@@ -81,9 +96,10 @@ td, th {
   <h2>Sofisticatto</h2>
   <p id="user-info"></p>
 
-  <button onclick="irPara('consulta')">Consulta</button>
-  <button onclick="irPara('cadastro')">Cadastro</button>
-  <button onclick="logout()">Sair</button>
+  <button onclick="irPara('consulta')">📦 Consulta</button>
+  <button onclick="irPara('cadastro')">➕ Cadastro</button>
+  <button id="btn-usuarios" onclick="irPara('usuarios')" style="display:none;">👤 Usuários</button>
+  <button onclick="logout()">🚪 Sair</button>
 </div>
 
 <!-- CONTEÚDO -->
@@ -99,9 +115,9 @@ td, th {
 
 <!-- CONSULTA -->
 <div id="consulta" class="card hidden">
-  <h2>Consulta</h2>
+  <h2>Consulta de Produtos</h2>
 
-  <input id="busca" placeholder="Código">
+  <input id="busca" placeholder="Código ex: 31">
   <button onclick="buscar()">Buscar</button>
 
   <table>
@@ -110,16 +126,16 @@ td, th {
         <th>Código</th>
         <th>Descrição</th>
         <th>Nº Caixa</th>
-        <th>Qtde</th>
+        <th>Qtde/Caixa</th>
       </tr>
     </thead>
     <tbody id="tabela"></tbody>
   </table>
 </div>
 
-<!-- CADASTRO -->
+<!-- CADASTRO PRODUTO -->
 <div id="cadastro" class="card hidden">
-  <h2>Cadastro</h2>
+  <h2>Cadastro de Produto</h2>
 
   <input id="codigo" placeholder="Código">
   <input id="descricao" placeholder="Descrição">
@@ -127,6 +143,21 @@ td, th {
   <input id="qtde_caixa" placeholder="Qtde por Caixa">
 
   <button onclick="salvar()">Salvar</button>
+</div>
+
+<!-- USUÁRIOS -->
+<div id="usuarios" class="card hidden">
+  <h2>Cadastro de Usuários</h2>
+
+  <input id="novo-user" placeholder="Usuário">
+  <input id="nova-senha" placeholder="Senha">
+
+  <select id="role">
+    <option value="user">Usuário</option>
+    <option value="admin">Admin</option>
+  </select>
+
+  <button onclick="criarUsuario()">Criar Usuário</button>
 </div>
 
 </div>
@@ -139,12 +170,15 @@ const supa = supabase.createClient(
 
 let usuarioLogado = null;
 
+// NAVEGAÇÃO
 function irPara(secao) {
-  document.getElementById("consulta").classList.add("hidden");
-  document.getElementById("cadastro").classList.add("hidden");
+  ["consulta","cadastro","usuarios"].forEach(s =>
+    document.getElementById(s).classList.add("hidden")
+  );
   document.getElementById(secao).classList.remove("hidden");
 }
 
+// LOGIN
 async function login() {
   const user = document.getElementById("login-username").value;
   const pass = document.getElementById("login-password").value;
@@ -157,7 +191,6 @@ async function login() {
     .maybeSingle();
 
   if (error) {
-    console.log(error);
     alert("Erro no login");
     return;
   }
@@ -173,13 +206,20 @@ async function login() {
   document.getElementById("menu").classList.remove("hidden");
 
   document.getElementById("user-info").textContent =
-    "Logado como: " + data.username;
+    "Logado como: " + data.username + " (" + data.role + ")";
+
+  // MOSTRAR BOTÃO ADMIN
+  if (data.role === "admin") {
+    document.getElementById("btn-usuarios").style.display = "block";
+  }
 }
 
+// LOGOUT
 function logout() {
   location.reload();
 }
 
+// CONSULTA
 async function buscar() {
   const codigo = document.getElementById("busca").value;
 
@@ -197,10 +237,18 @@ async function buscar() {
   }
 
   data.forEach(p => {
-    tabela.innerHTML += "<tr><td>" + p.codigo + "</td><td>" + p.descricao + "</td><td>" + p.numero_caixa + "</td><td>" + p.qtde_caixa + "</td></tr>";
+    tabela.innerHTML += `
+      <tr>
+        <td>${p.codigo}</td>
+        <td>${p.descricao}</td>
+        <td>${p.numero_caixa}</td>
+        <td>${p.qtde_caixa}</td>
+      </tr>
+    `;
   });
 }
 
+// SALVAR PRODUTO
 async function salvar() {
   const { error } = await supa.from("produtos").insert({
     codigo: document.getElementById("codigo").value,
@@ -214,7 +262,23 @@ async function salvar() {
     return;
   }
 
-  alert("Salvo com sucesso");
+  alert("Produto salvo!");
+}
+
+// CRIAR USUÁRIO
+async function criarUsuario() {
+  const { error } = await supa.from("usuarios").insert({
+    username: document.getElementById("novo-user").value,
+    senha: document.getElementById("nova-senha").value,
+    role: document.getElementById("role").value
+  });
+
+  if (error) {
+    alert("Erro ao criar usuário");
+    return;
+  }
+
+  alert("Usuário criado com sucesso!");
 }
 </script>
 
