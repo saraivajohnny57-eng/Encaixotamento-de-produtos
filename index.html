@@ -67,10 +67,11 @@ th { background:#6a1b9a; color:white; }
 
 <!-- CONSULTA -->
 <div id="consulta" class="card hidden">
-  <h2>Consulta de Produtos</h2>
+  <h2>Consulta</h2>
 
   <input id="busca" placeholder="Código">
   <input id="quantidade" placeholder="Quantidade">
+
   <button onclick="buscar()">Buscar</button>
   <button onclick="calcular()">Calcular</button>
 
@@ -152,8 +153,8 @@ function irPara(secao) {
 
 // LOGIN
 async function login() {
-  const user = login-username.value;
-  const pass = login-password.value;
+  const user = document.getElementById("login-username").value;
+  const pass = document.getElementById("login-password").value;
 
   const { data } = await supa
     .from("usuarios")
@@ -166,13 +167,14 @@ async function login() {
 
   usuarioLogado = data;
 
-  login.classList.add("hidden");
-  menu.classList.remove("hidden");
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("menu").classList.remove("hidden");
 
-  user-info.textContent = "Logado: " + data.username;
+  document.getElementById("user-info").textContent =
+    "Logado: " + data.username;
 
   if (data.role === "admin") {
-    btn-usuarios.style.display = "block";
+    document.getElementById("btn-usuarios").style.display = "block";
   }
 }
 
@@ -183,11 +185,17 @@ function logout() {
 
 // BUSCAR
 async function buscar() {
-  const codigo = busca.value;
+  const codigo = document.getElementById("busca").value;
 
   const { data } = await supa.from("produtos").select("*").eq("codigo", codigo);
 
+  const tabela = document.getElementById("tabela");
   tabela.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    tabela.innerHTML = "<tr><td colspan='4'>Nenhum resultado</td></tr>";
+    return;
+  }
 
   data.forEach(p => {
     tabela.innerHTML += `
@@ -202,10 +210,16 @@ async function buscar() {
 
 // CALCULAR
 async function calcular() {
-  const codigo = busca.value;
-  const qtd = Number(quantidade.value);
+  const codigo = document.getElementById("busca").value;
+  const qtd = Number(document.getElementById("quantidade").value);
 
-  const { data } = await supa.from("produtos").select("*").eq("codigo", codigo).maybeSingle();
+  const { data } = await supa
+    .from("produtos")
+    .select("*")
+    .eq("codigo", codigo)
+    .maybeSingle();
+
+  if (!data) return alert("Produto não encontrado");
 
   const caixas = Math.floor(qtd / data.qtde_caixa);
   const resto = qtd % data.qtde_caixa;
@@ -214,18 +228,18 @@ async function calcular() {
 
   if (resto > 0) txt += " + 1 aberta (" + resto + ")";
 
-  resultado-calculo.textContent = txt;
+  document.getElementById("resultado-calculo").textContent = txt;
 }
 
-// SALVAR (INSERT ou UPDATE)
+// SALVAR
 async function salvar() {
-  const id = produto-id.value;
+  const id = document.getElementById("produto-id").value;
 
   const dados = {
-    codigo: codigo.value,
-    descricao: descricao.value,
-    numero_caixa: numero_caixa.value,
-    qtde_caixa: qtde_caixa.value
+    codigo: document.getElementById("codigo").value,
+    descricao: document.getElementById("descricao").value,
+    numero_caixa: document.getElementById("numero_caixa").value,
+    qtde_caixa: document.getElementById("qtde_caixa").value
   };
 
   if (id) {
@@ -239,14 +253,15 @@ async function salvar() {
   carregarLista();
 }
 
-// LISTAR PRODUTOS
+// LISTAR
 async function carregarLista() {
   const { data } = await supa.from("produtos").select("*");
 
-  lista-produtos.innerHTML = "";
+  const lista = document.getElementById("lista-produtos");
+  lista.innerHTML = "";
 
   data.forEach(p => {
-    lista-produtos.innerHTML += `
+    lista.innerHTML += `
       <tr>
         <td>${p.codigo}</td>
         <td>${p.descricao}</td>
@@ -262,11 +277,11 @@ async function carregarLista() {
 async function editar(id) {
   const { data } = await supa.from("produtos").select("*").eq("id", id).maybeSingle();
 
-  produto-id.value = data.id;
-  codigo.value = data.codigo;
-  descricao.value = data.descricao;
-  numero_caixa.value = data.numero_caixa;
-  qtde_caixa.value = data.qtde_caixa;
+  document.getElementById("produto-id").value = data.id;
+  document.getElementById("codigo").value = data.codigo;
+  document.getElementById("descricao").value = data.descricao;
+  document.getElementById("numero_caixa").value = data.numero_caixa;
+  document.getElementById("qtde_caixa").value = data.qtde_caixa;
 }
 
 // EXCLUIR
@@ -279,19 +294,19 @@ async function excluir(id) {
 
 // LIMPAR
 function limpar() {
-  produto-id.value = "";
-  codigo.value = "";
-  descricao.value = "";
-  numero_caixa.value = "";
-  qtde_caixa.value = "";
+  document.getElementById("produto-id").value = "";
+  document.getElementById("codigo").value = "";
+  document.getElementById("descricao").value = "";
+  document.getElementById("numero_caixa").value = "";
+  document.getElementById("qtde_caixa").value = "";
 }
 
-// CRIAR USUÁRIO
+// USUÁRIO
 async function criarUsuario() {
   await supa.from("usuarios").insert({
-    username: novo-user.value,
-    senha: nova-senha.value,
-    role: role.value
+    username: document.getElementById("novo-user").value,
+    senha: document.getElementById("nova-senha").value,
+    role: document.getElementById("role").value
   });
 
   alert("Usuário criado!");
