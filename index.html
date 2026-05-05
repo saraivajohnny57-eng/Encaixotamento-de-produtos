@@ -6,70 +6,54 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
 
   <style>
-    body {
-      font-family: Arial;
-      background: #f5f5f5;
-      margin: 0;
-    }
+    body { font-family: Arial; background:#f5f5f5; margin:0; }
 
     header {
-      text-align: center;
-      padding: 20px;
-      background: #fff;
-      border-bottom: 1px solid #ddd;
+      text-align:center;
+      padding:20px;
+      background:#fff;
+      border-bottom:1px solid #ddd;
     }
 
     .logo {
-      font-size: 24px;
-      color: #6a1b9a;
-      font-weight: bold;
+      font-size:24px;
+      color:#6a1b9a;
+      font-weight:bold;
     }
 
     .container {
-      max-width: 900px;
-      margin: 20px auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
+      max-width:900px;
+      margin:20px auto;
+      background:#fff;
+      padding:20px;
+      border-radius:8px;
     }
 
     button {
-      margin-top: 10px;
-      padding: 8px 15px;
-      border: none;
-      background: #6a1b9a;
-      color: white;
-      cursor: pointer;
-      border-radius: 4px;
+      margin-top:10px;
+      padding:8px 15px;
+      border:none;
+      background:#6a1b9a;
+      color:white;
+      cursor:pointer;
+      border-radius:4px;
     }
 
-    .secondary {
-      background: #777;
-    }
-
-    .hidden {
-      display: none;
-    }
+    .secondary { background:#777; }
+    .hidden { display:none; }
 
     table {
-      width: 100%;
-      margin-top: 10px;
-      border-collapse: collapse;
+      width:100%;
+      margin-top:10px;
+      border-collapse:collapse;
     }
 
     th, td {
-      border: 1px solid #ddd;
-      padding: 6px;
+      border:1px solid #ddd;
+      padding:6px;
     }
 
-    .msg {
-      margin-top: 10px;
-      color: red;
-    }
-
-    .ok {
-      color: green;
-    }
+    .msg { margin-top:10px; color:red; }
   </style>
 </head>
 
@@ -80,7 +64,6 @@
   <div>Sistema de Produtos</div>
 </header>
 
-<!-- LOGIN -->
 <div class="container" id="login-section">
   <h2>Login</h2>
   <input id="login-username" placeholder="Usuário">
@@ -89,7 +72,6 @@
   <div id="login-msg" class="msg"></div>
 </div>
 
-<!-- MENU -->
 <div class="container hidden" id="menu-section">
   <h2>Menu</h2>
   <p id="user-info"></p>
@@ -100,9 +82,10 @@
   <button onclick="logout()" class="secondary">Sair</button>
 </div>
 
-<!-- CONSULTA -->
 <div class="container hidden" id="consulta-section">
   <h2>Consulta</h2>
+  <button onclick="irPara('menu-section')" class="secondary">⬅️ Voltar</button>
+
   <input id="consulta-busca">
   <button id="btn-consultar">Buscar</button>
 
@@ -111,9 +94,9 @@
   </table>
 </div>
 
-<!-- CADASTRO -->
 <div class="container hidden" id="cadastro-produto-section">
   <h2>Cadastro</h2>
+  <button onclick="irPara('menu-section')" class="secondary">⬅️ Voltar</button>
 
   <input id="produto-id" type="hidden">
   <input id="produto-codigo" placeholder="Código">
@@ -122,9 +105,9 @@
   <button id="btn-salvar-produto">Salvar</button>
 </div>
 
-<!-- USUÁRIOS -->
 <div class="container hidden" id="usuarios-section">
   <h2>Usuários</h2>
+  <button onclick="irPara('menu-section')" class="secondary">⬅️ Voltar</button>
 
   <input id="usuario-username" placeholder="Usuário">
   <input id="usuario-senha" placeholder="Senha">
@@ -147,7 +130,6 @@ const supa = createClient(
 
 let usuarioLogado = null;
 
-// NAVEGAÇÃO
 function irPara(secao) {
   if (!usuarioLogado && secao !== "login-section") return;
 
@@ -157,26 +139,29 @@ function irPara(secao) {
   document.getElementById(secao).classList.remove("hidden");
 }
 
-// LOGIN
 document.getElementById("btn-login").onclick = async () => {
-  const user = login-username.value;
-  const pass = login-password.value;
+  const user = document.getElementById("login-username").value.trim();
+  const pass = document.getElementById("login-password").value.trim();
+  const msg = document.getElementById("login-msg");
 
-  const { data } = await supa
+  msg.textContent = "";
+
+  const { data, error } = await supa
     .from("usuarios")
     .select("*")
     .eq("username", user)
     .eq("senha", pass)
     .maybeSingle();
 
-  if (!data) {
-    login-msg.textContent = "Erro no login";
+  if (error || !data) {
+    msg.textContent = "Erro no login";
     return;
   }
 
   usuarioLogado = data;
 
-  user-info.textContent = Logado: ${data.username} (${data.role});
+  document.getElementById("user-info").textContent =
+    Logado: ${data.username} (${data.role});
 
   document.getElementById("btn-menu-usuarios").style.display =
     data.role === "admin" ? "inline-block" : "none";
@@ -184,20 +169,19 @@ document.getElementById("btn-login").onclick = async () => {
   irPara("menu-section");
 };
 
-// LOGOUT
 function logout() {
   usuarioLogado = null;
   irPara("login-section");
 }
 
-// CONSULTA
-btn-consultar.onclick = async () => {
+document.getElementById("btn-consultar").onclick = async () => {
   const { data } = await supa.from("produtos").select("*");
 
-  tabela-produtos.innerHTML = "";
+  const tabela = document.getElementById("tabela-produtos");
+  tabela.innerHTML = "";
 
   data.forEach(p => {
-    tabela-produtos.innerHTML += `
+    tabela.innerHTML += `
       <tr>
         <td>${p.id}</td>
         <td>${p.codigo}</td>
@@ -206,28 +190,25 @@ btn-consultar.onclick = async () => {
   });
 };
 
-// SALVAR PRODUTO
-btn-salvar-produto.onclick = async () => {
+document.getElementById("btn-salvar-produto").onclick = async () => {
   await supa.from("produtos").insert({
-    codigo: produto-codigo.value,
-    descricao: produto-descricao.value
+    codigo: document.getElementById("produto-codigo").value,
+    descricao: document.getElementById("produto-descricao").value
   });
 
   alert("Salvo!");
 };
 
-// CRIAR USUÁRIO
-btn-criar-usuario.onclick = async () => {
+document.getElementById("btn-criar-usuario").onclick = async () => {
   await supa.from("usuarios").insert({
-    username: usuario-username.value,
-    senha: usuario-senha.value,
-    role: usuario-role.value
+    username: document.getElementById("usuario-username").value,
+    senha: document.getElementById("usuario-senha").value,
+    role: document.getElementById("usuario-role").value
   });
 
   alert("Usuário criado!");
 };
 
-// INÍCIO
 irPara("login-section");
 </script>
 
