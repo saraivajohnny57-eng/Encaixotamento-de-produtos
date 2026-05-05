@@ -36,7 +36,6 @@ table { width:100%; margin-top:10px; border-collapse:collapse; }
 td, th { border:1px solid #ddd; padding:6px; }
 
 .msg { color:red; margin-top:10px; }
-.ok { color:green; }
 </style>
 </head>
 
@@ -63,47 +62,42 @@ td, th { border:1px solid #ddd; padding:6px; }
 
   <button onclick="irPara('consulta-section')">Consulta</button>
   <button onclick="irPara('cadastro-produto-section')">Cadastro Produto</button>
-  <button onclick="irPara('usuarios-section')" id="btn-usuarios">Usuários</button>
+  <button onclick="irPara('menu-section')">Atualizar</button>
   <button onclick="logout()" class="secondary">Sair</button>
 </div>
 
 <!-- CONSULTA -->
 <div class="container hidden" id="consulta-section">
   <h2>Consulta</h2>
-  <input id="busca">
+
+  <input id="busca-codigo" placeholder="Código ex: 31">
   <button onclick="buscar()">Buscar</button>
 
   <table>
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Descrição</th>
+        <th>Nº Caixa</th>
+        <th>Qtde/Caixa</th>
+      </tr>
+    </thead>
     <tbody id="tabela"></tbody>
   </table>
 
   <button onclick="irPara('menu-section')">Voltar</button>
 </div>
 
-<!-- CADASTRO PRODUTO -->
+<!-- CADASTRO -->
 <div class="container hidden" id="cadastro-produto-section">
   <h2>Cadastro Produto</h2>
 
   <input id="codigo" placeholder="Código"><br>
   <input id="descricao" placeholder="Descrição"><br>
+  <input id="numero_caixa" placeholder="Número da Caixa"><br>
+  <input id="qtde_caixa" placeholder="Qtde por Caixa"><br>
 
   <button onclick="salvarProduto()">Salvar</button>
-  <button onclick="irPara('menu-section')">Voltar</button>
-</div>
-
-<!-- USUÁRIOS -->
-<div class="container hidden" id="usuarios-section">
-  <h2>Usuários</h2>
-
-  <input id="novo-user" placeholder="Usuário"><br>
-  <input id="nova-senha" placeholder="Senha"><br>
-
-  <select id="role">
-    <option value="user">Usuário</option>
-    <option value="admin">Admin</option>
-  </select><br>
-
-  <button onclick="criarUsuario()">Criar</button>
   <button onclick="irPara('menu-section')">Voltar</button>
 </div>
 
@@ -117,7 +111,7 @@ let usuarioLogado = null;
 
 // NAVEGAÇÃO
 function irPara(secao) {
-  ["login-section","menu-section","consulta-section","cadastro-produto-section","usuarios-section"]
+  ["login-section","menu-section","consulta-section","cadastro-produto-section"]
   .forEach(s => document.getElementById(s).classList.add("hidden"));
 
   document.getElementById(secao).classList.remove("hidden");
@@ -145,59 +139,54 @@ document.getElementById("btn-login").onclick = async () => {
   document.getElementById("user-info").textContent =
   `Logado como: ${data.username} (${data.role})`;
 
-  // controle admin
-  if (data.role === "admin") {
-    document.getElementById("btn-usuarios").style.display = "inline-block";
-  } else {
-    document.getElementById("btn-usuarios").style.display = "none";
-  }
-
   irPara("menu-section");
 };
 
-// LOGOUT
-function logout() {
-  usuarioLogado = null;
-  irPara("login-section");
-}
-
-// CONSULTA
+// CONSULTA POR CÓDIGO
 async function buscar() {
-  const { data } = await supa.from("produtos").select("*");
+  const codigo = document.getElementById("busca-codigo").value;
+
+  const { data } = await supa
+    .from("produtos")
+    .select("*")
+    .eq("codigo", codigo);
 
   const tabela = document.getElementById("tabela");
   tabela.innerHTML = "";
 
+  if (!data || data.length === 0) {
+    tabela.innerHTML = "<tr><td colspan='4'>Nenhum resultado</td></tr>";
+    return;
+  }
+
   data.forEach(p => {
     tabela.innerHTML += `
       <tr>
-        <td>${p.id}</td>
         <td>${p.codigo}</td>
         <td>${p.descricao}</td>
+        <td>${p.numero_caixa}</td>
+        <td>${p.qtde_caixa}</td>
       </tr>
     `;
   });
 }
 
-// CADASTRO PRODUTO
+// SALVAR PRODUTO
 async function salvarProduto() {
   await supa.from("produtos").insert({
     codigo: document.getElementById("codigo").value,
-    descricao: document.getElementById("descricao").value
+    descricao: document.getElementById("descricao").value,
+    numero_caixa: document.getElementById("numero_caixa").value,
+    qtde_caixa: document.getElementById("qtde_caixa").value
   });
 
   alert("Produto salvo!");
 }
 
-// USUÁRIO
-async function criarUsuario() {
-  await supa.from("usuarios").insert({
-    username: document.getElementById("novo-user").value,
-    senha: document.getElementById("nova-senha").value,
-    role: document.getElementById("role").value
-  });
-
-  alert("Usuário criado!");
+// LOGOUT
+function logout() {
+  usuarioLogado = null;
+  irPara("login-section");
 }
 
 // INÍCIO
