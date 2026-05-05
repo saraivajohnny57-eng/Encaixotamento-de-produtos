@@ -7,71 +7,119 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <style>
-body { font-family: Arial; background:#f5f5f5; margin:0; }
-header { text-align:center; padding:20px; background:#fff; border-bottom:1px solid #ddd; }
-.logo { font-size:24px; color:#6a1b9a; font-weight:bold; }
-
-.container {
-  max-width:900px;
-  margin:20px auto;
-  background:#fff;
-  padding:20px;
-  border-radius:8px;
+body {
+  margin:0;
+  font-family: Arial;
+  background:#f4f6f9;
+  display:flex;
 }
 
-button {
-  margin-top:10px;
-  padding:8px 15px;
-  border:none;
+/* MENU LATERAL */
+.sidebar {
+  width:220px;
   background:#6a1b9a;
   color:white;
-  cursor:pointer;
+  height:100vh;
+  padding:20px;
+}
+
+.sidebar h2 {
+  text-align:center;
+}
+
+.sidebar button {
+  width:100%;
+  margin-top:10px;
+  background:#8e24aa;
+}
+
+.sidebar button:hover {
+  background:#ab47bc;
+}
+
+/* CONTEÚDO */
+.main {
+  flex:1;
+  padding:20px;
+}
+
+.card {
+  background:white;
+  padding:20px;
+  border-radius:8px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+input {
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  border:1px solid #ccc;
   border-radius:4px;
 }
 
+button {
+  padding:10px 15px;
+  border:none;
+  border-radius:4px;
+  cursor:pointer;
+  color:white;
+}
+
+.primary { background:#6a1b9a; }
 .secondary { background:#777; }
+
+/* TABELA */
+table {
+  width:100%;
+  margin-top:15px;
+  border-collapse:collapse;
+}
+
+th {
+  background:#6a1b9a;
+  color:white;
+}
+
+td, th {
+  padding:10px;
+  border:1px solid #ddd;
+}
+
+/* ESCONDER */
 .hidden { display:none; }
-
-table { width:100%; margin-top:10px; border-collapse:collapse; }
-td, th { border:1px solid #ddd; padding:6px; }
-
-.msg { color:red; margin-top:10px; }
 </style>
 </head>
 
 <body>
 
-<header>
-  <div class="logo">Sofisticatto</div>
-  <div>Sistema de Produtos</div>
-</header>
-
-<!-- LOGIN -->
-<div class="container" id="login-section">
-  <h2>Login</h2>
-  <input id="login-username" placeholder="Usuário"><br>
-  <input id="login-password" type="password" placeholder="Senha"><br>
-  <button id="btn-login">Entrar</button>
-  <div id="login-msg" class="msg"></div>
-</div>
-
 <!-- MENU -->
-<div class="container hidden" id="menu-section">
-  <h2>Menu</h2>
+<div class="sidebar hidden" id="menu">
+  <h2>Sofisticatto</h2>
   <p id="user-info"></p>
 
-  <button onclick="irPara('consulta-section')">Consulta</button>
-  <button onclick="irPara('cadastro-produto-section')">Cadastro Produto</button>
-  <button onclick="irPara('menu-section')">Atualizar</button>
-  <button onclick="logout()" class="secondary">Sair</button>
+  <button onclick="irPara('consulta')">📦 Consulta</button>
+  <button onclick="irPara('cadastro')">➕ Cadastro</button>
+  <button onclick="logout()">🚪 Sair</button>
+</div>
+
+<!-- CONTEÚDO -->
+<div class="main">
+
+<!-- LOGIN -->
+<div id="login" class="card">
+  <h2>Login</h2>
+  <input id="login-username" placeholder="Usuário">
+  <input id="login-password" type="password" placeholder="Senha">
+  <button class="primary" onclick="login()">Entrar</button>
 </div>
 
 <!-- CONSULTA -->
-<div class="container hidden" id="consulta-section">
-  <h2>Consulta</h2>
+<div id="consulta" class="card hidden">
+  <h2>Consulta de Produtos</h2>
 
-  <input id="busca-codigo" placeholder="Código ex: 31">
-  <button onclick="buscar()">Buscar</button>
+  <input id="busca" placeholder="Código">
+  <button class="primary" onclick="buscar()">Buscar</button>
 
   <table>
     <thead>
@@ -79,26 +127,25 @@ td, th { border:1px solid #ddd; padding:6px; }
         <th>Código</th>
         <th>Descrição</th>
         <th>Nº Caixa</th>
-        <th>Qtde/Caixa</th>
+        <th>Qtde</th>
       </tr>
     </thead>
     <tbody id="tabela"></tbody>
   </table>
-
-  <button onclick="irPara('menu-section')">Voltar</button>
 </div>
 
 <!-- CADASTRO -->
-<div class="container hidden" id="cadastro-produto-section">
-  <h2>Cadastro Produto</h2>
+<div id="cadastro" class="card hidden">
+  <h2>Cadastro de Produto</h2>
 
-  <input id="codigo" placeholder="Código"><br>
-  <input id="descricao" placeholder="Descrição"><br>
-  <input id="numero_caixa" placeholder="Número da Caixa"><br>
-  <input id="qtde_caixa" placeholder="Qtde por Caixa"><br>
+  <input id="codigo" placeholder="Código">
+  <input id="descricao" placeholder="Descrição">
+  <input id="numero_caixa" placeholder="Número da Caixa">
+  <input id="qtde_caixa" placeholder="Qtde por Caixa">
 
-  <button onclick="salvarProduto()">Salvar</button>
-  <button onclick="irPara('menu-section')">Voltar</button>
+  <button class="primary" onclick="salvar()">Salvar</button>
+</div>
+
 </div>
 
 <script>
@@ -109,18 +156,14 @@ const supa = supabase.createClient(
 
 let usuarioLogado = null;
 
-// NAVEGAÇÃO
 function irPara(secao) {
-  ["login-section","menu-section","consulta-section","cadastro-produto-section"]
-  .forEach(s => document.getElementById(s).classList.add("hidden"));
-
+  ["consulta","cadastro"].forEach(s => document.getElementById(s).classList.add("hidden"));
   document.getElementById(secao).classList.remove("hidden");
 }
 
-// LOGIN
-document.getElementById("btn-login").onclick = async () => {
-  const user = document.getElementById("login-username").value.trim();
-  const pass = document.getElementById("login-password").value.trim();
+async function login() {
+  const user = login-username.value;
+  const pass = login-password.value;
 
   const { data } = await supa
     .from("usuarios")
@@ -130,34 +173,32 @@ document.getElementById("btn-login").onclick = async () => {
     .maybeSingle();
 
   if (!data) {
-    document.getElementById("login-msg").textContent = "Usuário ou senha inválidos";
+    alert("Login inválido");
     return;
   }
 
   usuarioLogado = data;
 
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("menu").classList.remove("hidden");
+
   document.getElementById("user-info").textContent =
-  `Logado como: ${data.username} (${data.role})`;
+  👤 ${data.username};
+}
 
-  irPara("menu-section");
-};
+function logout() {
+  location.reload();
+}
 
-// CONSULTA POR CÓDIGO
 async function buscar() {
-  const codigo = document.getElementById("busca-codigo").value;
+  const codigo = busca.value;
 
   const { data } = await supa
     .from("produtos")
     .select("*")
     .eq("codigo", codigo);
 
-  const tabela = document.getElementById("tabela");
   tabela.innerHTML = "";
-
-  if (!data || data.length === 0) {
-    tabela.innerHTML = "<tr><td colspan='4'>Nenhum resultado</td></tr>";
-    return;
-  }
 
   data.forEach(p => {
     tabela.innerHTML += `
@@ -166,31 +207,25 @@ async function buscar() {
         <td>${p.descricao}</td>
         <td>${p.numero_caixa}</td>
         <td>${p.qtde_caixa}</td>
-      </tr>
-    `;
+      </tr>`;
   });
 }
 
-// SALVAR PRODUTO
-async function salvarProduto() {
-  await supa.from("produtos").insert({
-    codigo: document.getElementById("codigo").value,
-    descricao: document.getElementById("descricao").value,
-    numero_caixa: document.getElementById("numero_caixa").value,
-    qtde_caixa: document.getElementById("qtde_caixa").value
+async function salvar() {
+  const { error } = await supa.from("produtos").insert({
+    codigo: codigo.value,
+    descricao: descricao.value,
+    numero_caixa: numero_caixa.value,
+    qtde_caixa: qtde_caixa.value
   });
 
-  alert("Produto salvo!");
-}
+  if (error) {
+    alert("Erro ao salvar");
+    return;
+  }
 
-// LOGOUT
-function logout() {
-  usuarioLogado = null;
-  irPara("login-section");
+  alert("Salvo com sucesso!");
 }
-
-// INÍCIO
-irPara("login-section");
 </script>
 
 </body>
