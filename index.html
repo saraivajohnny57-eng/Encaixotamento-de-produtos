@@ -8,42 +8,77 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <style>
-body { margin:0; font-family: Arial; background:#f4f6f9; display:flex; }
+body {
+  margin:0;
+  font-family: Arial;
+  background:#f4f6f9;
+  display:flex;
+}
 
+/* MENU */
 .sidebar {
-  width:220px; background:#6a1b9a; color:white;
-  height:100vh; padding:20px;
+  width:220px;
+  background:#6a1b9a;
+  color:white;
+  height:100vh;
+  padding:20px;
+  display:none; /* 🔥 começa escondido */
 }
 
 .sidebar button {
-  width:100%; margin-top:10px; background:#8e24aa;
-  color:white; border:none; padding:10px;
+  width:100%;
+  margin-top:10px;
+  background:#8e24aa;
+  color:white;
+  border:none;
+  padding:10px;
   border-radius:4px;
 }
 
-.main { flex:1; padding:20px; }
+.main {
+  flex:1;
+  padding:20px;
+}
 
 .card {
-  background:white; padding:20px;
+  background:white;
+  padding:20px;
   border-radius:8px;
 }
 
 input, select {
-  width:100%; padding:10px;
+  width:100%;
+  padding:10px;
   margin-top:8px;
   border:1px solid #ccc;
   border-radius:4px;
 }
 
-button { margin-top:10px; padding:10px; cursor:pointer; }
+button {
+  margin-top:10px;
+  padding:10px;
+  cursor:pointer;
+}
 
-.hidden { display:none; }
+.hidden {
+  display:none;
+}
 
-table { width:100%; margin-top:10px; border-collapse:collapse; }
+table {
+  width:100%;
+  margin-top:10px;
+  border-collapse:collapse;
+}
 
-td, th { border:1px solid #ddd; padding:8px; }
+td, th {
+  border:1px solid #ddd;
+  padding:8px;
+}
 
-th { background:#6a1b9a; color:white; }
+th {
+  background:#6a1b9a;
+  color:white;
+}
 
 .resultado {
   margin-top:15px;
@@ -51,14 +86,15 @@ th { background:#6a1b9a; color:white; }
   color:#2e7d32;
 }
 
-/* RESPONSIVO */
+/* 📱 RESPONSIVO */
 @media (max-width:768px) {
-  body { flex-direction: column; }
+  body {
+    flex-direction:column;
+  }
 
   .sidebar {
     width:100%;
     height:auto;
-    display:flex;
     flex-wrap:wrap;
     justify-content:center;
   }
@@ -68,16 +104,21 @@ th { background:#6a1b9a; color:white; }
     margin:5px;
   }
 
-  .main { padding:10px; }
+  .main {
+    padding:10px;
+  }
 
-  table { font-size:12px; }
+  table {
+    font-size:12px;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<div class="sidebar hidden" id="menu">
+<!-- MENU -->
+<div class="sidebar" id="menu">
   <h2>Sofisticatto</h2>
   <p id="user-info"></p>
 
@@ -122,7 +163,7 @@ th { background:#6a1b9a; color:white; }
   <div id="resultado-calculo" class="resultado"></div>
 </div>
 
-<!-- CADASTRO PRODUTOS -->
+<!-- CADASTRO -->
 <div id="cadastro" class="card hidden">
   <h2>Cadastro de Produto</h2>
 
@@ -187,8 +228,10 @@ const supa = supabase.createClient(
 
 let usuarioLogado = null;
 
-// NAVEGAÇÃO
+// 🔒 NAVEGAÇÃO
 function irPara(secao) {
+  if (!usuarioLogado) return;
+
   ["consulta","cadastro","usuarios"].forEach(s =>
     document.getElementById(s).classList.add("hidden")
   );
@@ -199,7 +242,7 @@ function irPara(secao) {
   if (secao === "usuarios") carregarUsuarios();
 }
 
-// LOGIN
+// 🔐 LOGIN
 async function login() {
   const user = document.getElementById("login-username").value;
   const pass = document.getElementById("login-password").value;
@@ -216,7 +259,7 @@ async function login() {
   usuarioLogado = data;
 
   document.getElementById("login").classList.add("hidden");
-  document.getElementById("menu").classList.remove("hidden");
+  document.getElementById("menu").style.display = "block";
 
   document.getElementById("user-info").textContent =
     "Logado: " + data.username;
@@ -231,7 +274,7 @@ function logout() {
   location.reload();
 }
 
-// BUSCAR PRODUTO
+// BUSCAR
 async function buscar() {
   const codigo = document.getElementById("busca").value;
 
@@ -320,7 +363,7 @@ async function carregarLista() {
   });
 }
 
-// EDITAR PRODUTO
+// EDITAR
 async function editar(id) {
   const { data } = await supa.from("produtos").select("*").eq("id", id).maybeSingle();
 
@@ -331,7 +374,7 @@ async function editar(id) {
   document.getElementById("qtde_caixa").value = data.qtde_caixa;
 }
 
-// EXCLUIR PRODUTO
+// EXCLUIR
 async function excluir(id) {
   if (!confirm("Excluir produto?")) return;
 
@@ -339,7 +382,7 @@ async function excluir(id) {
   carregarLista();
 }
 
-// LIMPAR PRODUTO
+// LIMPAR
 function limpar() {
   document.getElementById("produto-id").value = "";
   document.getElementById("codigo").value = "";
@@ -350,7 +393,6 @@ function limpar() {
 
 // ===== USUÁRIOS =====
 
-// LISTAR
 async function carregarUsuarios() {
   const { data } = await supa.from("usuarios").select("*");
 
@@ -370,7 +412,6 @@ async function carregarUsuarios() {
   });
 }
 
-// SALVAR
 async function salvarUsuario() {
   const id = document.getElementById("usuario-id").value;
 
@@ -391,7 +432,6 @@ async function salvarUsuario() {
   carregarUsuarios();
 }
 
-// EDITAR
 async function editarUsuario(id) {
   const { data } = await supa.from("usuarios").select("*").eq("id", id).maybeSingle();
 
@@ -401,7 +441,6 @@ async function editarUsuario(id) {
   document.getElementById("role").value = data.role;
 }
 
-// EXCLUIR
 async function excluirUsuario(id) {
   if (!confirm("Excluir usuário?")) return;
 
@@ -409,7 +448,6 @@ async function excluirUsuario(id) {
   carregarUsuarios();
 }
 
-// LIMPAR
 function limparUsuario() {
   document.getElementById("usuario-id").value = "";
   document.getElementById("novo-user").value = "";
