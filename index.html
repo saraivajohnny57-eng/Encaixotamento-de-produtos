@@ -1,263 +1,87 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Sistema Sofisticatto</title>
-  <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
+<meta charset="UTF-8">
+<title>Sistema Sofisticatto</title>
 
-  <style>
-    body {
-      font-family: Arial;
-      background: #f5f5f5;
-      margin: 0;
-    }
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-    header {
-      text-align: center;
-      padding: 20px;
-      background: #fff;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .logo {
-      font-size: 24px;
-      color: #6a1b9a;
-      font-weight: bold;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 20px auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-    }
-
-    button {
-      margin-top: 10px;
-      padding: 8px 15px;
-      border: none;
-      background: #6a1b9a;
-      color: white;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-
-    .secondary {
-      background: #777;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    table {
-      width: 100%;
-      margin-top: 10px;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      border: 1px solid #ddd;
-      padding: 6px;
-    }
-
-    .msg {
-      margin-top: 10px;
-      color: red;
-    }
-
-    .ok {
-      color: green;
-    }
-  </style>
+<style>
+body { font-family: Arial; background:#f5f5f5; margin:0; }
+.container { max-width:800px; margin:30px auto; background:#fff; padding:20px; border-radius:8px; }
+.hidden { display:none; }
+button { padding:8px 15px; background:#6a1b9a; color:#fff; border:none; cursor:pointer; }
+.msg { color:red; margin-top:10px; }
+</style>
 </head>
 
 <body>
 
-<header>
-  <div class="logo">Sofisticatto</div>
-  <div>Sistema de Produtos</div>
-</header>
-
-<!-- LOGIN -->
-<div class="container" id="login-section">
-  <h2>Login</h2>
-  <input id="login-username" placeholder="Usuário">
-  <input id="login-password" type="password" placeholder="Senha">
-  <button id="btn-login">Entrar</button>
-  <div id="login-msg" class="msg"></div>
+<div class="container" id="login">
+<h2>Login</h2>
+<input id="user" placeholder="Usuário"><br><br>
+<input id="pass" type="password" placeholder="Senha"><br><br>
+<button onclick="login()">Entrar</button>
+<div id="msg" class="msg"></div>
 </div>
 
-<!-- MENU -->
-<div class="container hidden" id="menu-section">
-  <h2>Menu</h2>
-  <p id="user-info"></p>
-
-  <button onclick="irPara('consulta-section')">Consulta</button>
-  <button onclick="irPara('cadastro-produto-section')">Cadastro</button>
-  <button id="btn-menu-usuarios" onclick="irPara('usuarios-section')" class="secondary">Usuários</button>
-  <button onclick="logout()" class="secondary">Sair</button>
-</div>
-
-<!-- CONSULTA -->
-<div class="container hidden" id="consulta-section">
-  <h2>Consulta</h2>
-  <input id="consulta-busca" placeholder="Buscar...">
-  <button id="btn-consultar">Buscar</button>
-
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Código</th>
-        <th>Descrição</th>
-      </tr>
-    </thead>
-    <tbody id="tabela-produtos"></tbody>
-  </table>
-</div>
-
-<!-- CADASTRO -->
-<div class="container hidden" id="cadastro-produto-section">
-  <h2>Cadastro</h2>
-
-  <input id="produto-id" type="hidden">
-  <input id="produto-codigo" placeholder="Código">
-  <input id="produto-descricao" placeholder="Descrição">
-
-  <button id="btn-salvar-produto">Salvar</button>
-</div>
-
-<!-- USUÁRIOS -->
-<div class="container hidden" id="usuarios-section">
-  <h2>Usuários</h2>
-
-  <input id="usuario-username" placeholder="Usuário">
-  <input id="usuario-senha" placeholder="Senha">
-
-  <select id="usuario-role">
-    <option value="user">Usuário</option>
-    <option value="admin">Admin</option>
-  </select>
-
-  <button id="btn-criar-usuario">Criar</button>
+<div class="container hidden" id="menu">
+<h2>Menu</h2>
+<p id="info"></p>
+<button onclick="logout()">Sair</button>
 </div>
 
 <script>
-const { createClient } = supabase;
-
-const supa = createClient(
-  "https://gymyltthcegplqzbujrv.supabase.co",
-  "sb_publishable_yiTEjwaD0gPFz3nHb22bJQ_kTa-DWjS"
+const supa = supabase.createClient(
+"https://gymyltthcegplqzbujrv.supabase.co",
+"sb_publishable_yiTEjwaD0gPFz3nHb22bJQ_kTa-DWjS"
 );
 
-let usuarioLogado = null;
+let userLogado = null;
 
-// NAVEGAÇÃO
-function irPara(secao) {
-  if (!usuarioLogado && secao !== "login-section") return;
+async function login() {
+  const user = document.getElementById("user").value.trim();
+  const pass = document.getElementById("pass").value.trim();
+  const msg = document.getElementById("msg");
 
-  ["login-section","menu-section","consulta-section","cadastro-produto-section","usuarios-section"]
-    .forEach(s => document.getElementById(s).classList.add("hidden"));
+  msg.textContent = "";
 
-  document.getElementById(secao).classList.remove("hidden");
+  try {
+    const { data, error } = await supa
+      .from("usuarios")
+      .select("*")
+      .eq("username", user)
+      .maybeSingle();
+
+    if (error || !data) {
+      msg.textContent = "Usuário não encontrado";
+      return;
+    }
+
+    if (String(data.senha) !== String(pass)) {
+      msg.textContent = "Senha incorreta";
+      return;
+    }
+
+    userLogado = data;
+
+    document.getElementById("login").classList.add("hidden");
+    document.getElementById("menu").classList.remove("hidden");
+
+    document.getElementById("info").textContent =
+      "Logado como: " + data.username;
+
+  } catch (e) {
+    console.error(e);
+    msg.textContent = "Erro geral no sistema";
+  }
 }
 
-// LOGIN (CORRIGIDO)
-document.getElementById("btn-login").onclick = async () => {
-  const user = document.getElementById("login-username").value.trim();
-  const pass = document.getElementById("login-password").value.trim();
-
-  const { data, error } = await supa
-    .from("usuarios")
-    .select("*")
-    .eq("username", user)
-    .maybeSingle();
-
-  if (error || !data) {
-    document.getElementById("login-msg").textContent = "Usuário não encontrado";
-    return;
-  }
-
-  // 🔥 CORREÇÃO AQUI
-  if (String(data.senha) !== String(pass)) {
-    document.getElementById("login-msg").textContent = "Senha incorreta";
-    return;
-  }
-
-  usuarioLogado = data;
-
-  document.getElementById("user-info").textContent =
-    Logado: ${data.username} (${data.role});
-
-  document.getElementById("btn-menu-usuarios").style.display =
-    data.role === "admin" ? "inline-block" : "none";
-
-  irPara("menu-section");
-};
-
-// LOGOUT
 function logout() {
-  usuarioLogado = null;
-  irPara("login-section");
+  userLogado = null;
+  document.getElementById("login").classList.remove("hidden");
+  document.getElementById("menu").classList.add("hidden");
 }
-
-// CONSULTA
-document.getElementById("btn-consultar").onclick = async () => {
-  const termo = document.getElementById("consulta-busca").value;
-
-  let query = supa.from("produtos").select("*");
-
-  if (termo) {
-    query = query.or(codigo.ilike.%${termo}%,descricao.ilike.%${termo}%);
-  }
-
-  const { data } = await query;
-
-  const tabela = document.getElementById("tabela-produtos");
-  tabela.innerHTML = "";
-
-  data.forEach(p => {
-    tabela.innerHTML += `
-      <tr>
-        <td>${p.id}</td>
-        <td>${p.codigo}</td>
-        <td>${p.descricao}</td>
-      </tr>`;
-  });
-};
-
-// SALVAR PRODUTO
-document.getElementById("btn-salvar-produto").onclick = async () => {
-  const codigo = document.getElementById("produto-codigo").value;
-  const descricao = document.getElementById("produto-descricao").value;
-
-  await supa.from("produtos").insert({
-    codigo,
-    descricao
-  });
-
-  alert("Produto salvo!");
-};
-
-// CRIAR USUÁRIO
-document.getElementById("btn-criar-usuario").onclick = async () => {
-  const username = document.getElementById("usuario-username").value;
-  const senha = document.getElementById("usuario-senha").value;
-  const role = document.getElementById("usuario-role").value;
-
-  await supa.from("usuarios").insert({
-    username,
-    senha,
-    role
-  });
-
-  alert("Usuário criado!");
-};
-
-// INÍCIO
-irPara("login-section");
 </script>
 
 </body>
