@@ -143,7 +143,7 @@ document.getElementById("btn-login").onclick = async () => {
   usuarioLogado = data;
 
   document.getElementById("user-info").textContent =
-  Logado como: ${data.username} (${data.role});
+  `Logado como: ${data.username} (${data.role})`;
 
   // controle admin
   if (data.role === "admin") {
