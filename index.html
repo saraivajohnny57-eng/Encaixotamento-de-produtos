@@ -7,96 +7,52 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <style>
-body {
-  margin:0;
-  font-family: Arial;
-  background:#f4f6f9;
-  display:flex;
-}
+body { margin:0; font-family: Arial; background:#f4f6f9; display:flex; }
 
-/* MENU */
 .sidebar {
-  width:220px;
-  background:#6a1b9a;
-  color:white;
-  height:100vh;
-  padding:20px;
+  width:220px; background:#6a1b9a; color:white;
+  height:100vh; padding:20px;
 }
 
 .sidebar button {
-  width:100%;
-  margin-top:10px;
-  background:#8e24aa;
-  color:white;
-  border:none;
-  padding:10px;
-  border-radius:4px;
-  cursor:pointer;
+  width:100%; margin-top:10px; background:#8e24aa;
+  color:white; border:none; padding:10px;
+  border-radius:4px; cursor:pointer;
 }
 
-/* CONTEÚDO */
-.main {
-  flex:1;
-  padding:20px;
-}
+.main { flex:1; padding:20px; }
 
-.card {
-  background:white;
-  padding:20px;
-  border-radius:8px;
-}
+.card { background:white; padding:20px; border-radius:8px; }
 
 input, select {
-  width:100%;
-  padding:10px;
-  margin-top:8px;
-  border:1px solid #ccc;
-  border-radius:4px;
+  width:100%; padding:10px; margin-top:8px;
+  border:1px solid #ccc; border-radius:4px;
 }
 
-button {
-  margin-top:10px;
-  padding:10px;
-  cursor:pointer;
-}
+button { margin-top:10px; padding:10px; cursor:pointer; }
 
 .hidden { display:none; }
 
-table {
-  width:100%;
-  margin-top:10px;
-  border-collapse:collapse;
-}
+table { width:100%; margin-top:10px; border-collapse:collapse; }
 
-td, th {
-  border:1px solid #ddd;
-  padding:8px;
-}
+td, th { border:1px solid #ddd; padding:8px; }
 
-th {
-  background:#6a1b9a;
-  color:white;
-}
+th { background:#6a1b9a; color:white; }
 
-.resultado {
-  margin-top:15px;
-  font-weight:bold;
-  color:#2e7d32;
-}
+.resultado { margin-top:15px; font-weight:bold; color:#2e7d32; }
 </style>
 </head>
 
 <body>
 
-<!-- MENU -->
 <div class="sidebar hidden" id="menu">
   <h2>Sofisticatto</h2>
   <p id="user-info"></p>
 
-  <button onclick="irPara('consulta')">📦 Consulta</button>
-  <button onclick="irPara('cadastro')">➕ Cadastro</button>
-  <button id="btn-usuarios" onclick="irPara('usuarios')" style="display:none;">👤 Usuários</button>
-  <button onclick="logout()">🚪 Sair</button>
+  <button onclick="irPara('consulta')">Consulta</button>
+  <button onclick="irPara('cadastro')">Cadastro</button>
+  <button id="btn-usuarios" onclick="irPara('usuarios')" style="display:none;">Usuários</button>
+  <button onclick="logout()">Sair</button>
 </div>
 
 <div class="main">
@@ -113,9 +69,8 @@ th {
 <div id="consulta" class="card hidden">
   <h2>Consulta de Produtos</h2>
 
-  <input id="busca" placeholder="Código ex: 31">
-  <input id="quantidade" placeholder="Quantidade ex: 200">
-  
+  <input id="busca" placeholder="Código">
+  <input id="quantidade" placeholder="Quantidade">
   <button onclick="buscar()">Buscar</button>
   <button onclick="calcular()">Calcular</button>
 
@@ -125,7 +80,7 @@ th {
         <th>Código</th>
         <th>Descrição</th>
         <th>Nº Caixa</th>
-        <th>Qtde/Caixa</th>
+        <th>Qtde</th>
       </tr>
     </thead>
     <tbody id="tabela"></tbody>
@@ -138,17 +93,31 @@ th {
 <div id="cadastro" class="card hidden">
   <h2>Cadastro de Produto</h2>
 
+  <input id="produto-id" type="hidden">
   <input id="codigo" placeholder="Código">
   <input id="descricao" placeholder="Descrição">
   <input id="numero_caixa" placeholder="Número da Caixa">
   <input id="qtde_caixa" placeholder="Qtde por Caixa">
 
   <button onclick="salvar()">Salvar</button>
+  <button onclick="limpar()">Novo</button>
+
+  <h3>Lista de Produtos</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Descrição</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="lista-produtos"></tbody>
+  </table>
 </div>
 
 <!-- USUÁRIOS -->
 <div id="usuarios" class="card hidden">
-  <h2>Cadastro de Usuários</h2>
+  <h2>Usuários</h2>
 
   <input id="novo-user" placeholder="Usuário">
   <input id="nova-senha" placeholder="Senha">
@@ -158,7 +127,7 @@ th {
     <option value="admin">Admin</option>
   </select>
 
-  <button onclick="criarUsuario()">Criar Usuário</button>
+  <button onclick="criarUsuario()">Criar</button>
 </div>
 
 </div>
@@ -177,33 +146,33 @@ function irPara(secao) {
     document.getElementById(s).classList.add("hidden")
   );
   document.getElementById(secao).classList.remove("hidden");
+
+  if (secao === "cadastro") carregarLista();
 }
 
 // LOGIN
 async function login() {
-  const user = document.getElementById("login-username").value;
-  const pass = document.getElementById("login-password").value;
+  const user = login-username.value;
+  const pass = login-password.value;
 
-  const { data, error } = await supa
+  const { data } = await supa
     .from("usuarios")
     .select("*")
     .ilike("username", user)
     .eq("senha", pass)
     .maybeSingle();
 
-  if (error) return alert("Erro no login");
-  if (!data) return alert("Usuário ou senha inválidos");
+  if (!data) return alert("Login inválido");
 
   usuarioLogado = data;
 
-  document.getElementById("login").classList.add("hidden");
-  document.getElementById("menu").classList.remove("hidden");
+  login.classList.add("hidden");
+  menu.classList.remove("hidden");
 
-  document.getElementById("user-info").textContent =
-    "Logado como: " + data.username + " (" + data.role + ")";
+  user-info.textContent = "Logado: " + data.username;
 
   if (data.role === "admin") {
-    document.getElementById("btn-usuarios").style.display = "block";
+    btn-usuarios.style.display = "block";
   }
 }
 
@@ -212,22 +181,13 @@ function logout() {
   location.reload();
 }
 
-// BUSCAR PRODUTO
+// BUSCAR
 async function buscar() {
-  const codigo = document.getElementById("busca").value;
+  const codigo = busca.value;
 
-  const { data } = await supa
-    .from("produtos")
-    .select("*")
-    .eq("codigo", codigo);
+  const { data } = await supa.from("produtos").select("*").eq("codigo", codigo);
 
-  const tabela = document.getElementById("tabela");
   tabela.innerHTML = "";
-
-  if (!data || data.length === 0) {
-    tabela.innerHTML = "<tr><td colspan='4'>Nenhum resultado</td></tr>";
-    return;
-  }
 
   data.forEach(p => {
     tabela.innerHTML += `
@@ -236,72 +196,105 @@ async function buscar() {
         <td>${p.descricao}</td>
         <td>${p.numero_caixa}</td>
         <td>${p.qtde_caixa}</td>
-      </tr>
-    `;
+      </tr>`;
   });
 }
 
-// CALCULAR CAIXAS
+// CALCULAR
 async function calcular() {
-  const codigo = document.getElementById("busca").value;
-  const quantidade = Number(document.getElementById("quantidade").value);
+  const codigo = busca.value;
+  const qtd = Number(quantidade.value);
 
-  if (!codigo || !quantidade) {
-    alert("Preencha código e quantidade");
-    return;
-  }
+  const { data } = await supa.from("produtos").select("*").eq("codigo", codigo).maybeSingle();
 
-  const { data } = await supa
-    .from("produtos")
-    .select("*")
-    .eq("codigo", codigo)
-    .maybeSingle();
+  const caixas = Math.floor(qtd / data.qtde_caixa);
+  const resto = qtd % data.qtde_caixa;
 
-  if (!data) {
-    alert("Produto não encontrado");
-    return;
-  }
+  let txt = caixas + " caixas";
 
-  const porCaixa = Number(data.qtde_caixa);
+  if (resto > 0) txt += " + 1 aberta (" + resto + ")";
 
-  const caixas = Math.floor(quantidade / porCaixa);
-  const resto = quantidade % porCaixa;
-
-  let resultado = caixas + " caixas fechadas";
-
-  if (resto > 0) {
-    resultado += " + 1 caixa aberta (" + resto + " unidades)";
-  }
-
-  document.getElementById("resultado-calculo").textContent =
-    "Resultado: " + resultado;
+  resultado-calculo.textContent = txt;
 }
 
-// SALVAR PRODUTO
+// SALVAR (INSERT ou UPDATE)
 async function salvar() {
-  const { error } = await supa.from("produtos").insert({
-    codigo: document.getElementById("codigo").value,
-    descricao: document.getElementById("descricao").value,
-    numero_caixa: document.getElementById("numero_caixa").value,
-    qtde_caixa: document.getElementById("qtde_caixa").value
+  const id = produto-id.value;
+
+  const dados = {
+    codigo: codigo.value,
+    descricao: descricao.value,
+    numero_caixa: numero_caixa.value,
+    qtde_caixa: qtde_caixa.value
+  };
+
+  if (id) {
+    await supa.from("produtos").update(dados).eq("id", id);
+  } else {
+    await supa.from("produtos").insert(dados);
+  }
+
+  alert("Salvo!");
+  limpar();
+  carregarLista();
+}
+
+// LISTAR PRODUTOS
+async function carregarLista() {
+  const { data } = await supa.from("produtos").select("*");
+
+  lista-produtos.innerHTML = "";
+
+  data.forEach(p => {
+    lista-produtos.innerHTML += `
+      <tr>
+        <td>${p.codigo}</td>
+        <td>${p.descricao}</td>
+        <td>
+          <button onclick="editar(${p.id})">Editar</button>
+          <button onclick="excluir(${p.id})">Excluir</button>
+        </td>
+      </tr>`;
   });
+}
 
-  if (error) return alert("Erro ao salvar");
+// EDITAR
+async function editar(id) {
+  const { data } = await supa.from("produtos").select("*").eq("id", id).maybeSingle();
 
-  alert("Produto salvo!");
+  produto-id.value = data.id;
+  codigo.value = data.codigo;
+  descricao.value = data.descricao;
+  numero_caixa.value = data.numero_caixa;
+  qtde_caixa.value = data.qtde_caixa;
+}
+
+// EXCLUIR
+async function excluir(id) {
+  if (!confirm("Excluir produto?")) return;
+
+  await supa.from("produtos").delete().eq("id", id);
+  carregarLista();
+}
+
+// LIMPAR
+function limpar() {
+  produto-id.value = "";
+  codigo.value = "";
+  descricao.value = "";
+  numero_caixa.value = "";
+  qtde_caixa.value = "";
 }
 
 // CRIAR USUÁRIO
 async function criarUsuario() {
-  const { error } = await supa.from("usuarios").insert({
-    username: document.getElementById("novo-user").value,
-    senha: document.getElementById("nova-senha").value,
-    role: document.getElementById("role").value
+  await supa.from("usuarios").insert({
+    username: novo-user.value,
+    senha: nova-senha.value,
+    role: role.value
   });
 
-  if (error) return alert("Erro ao criar usuário");
-
-  alert("Usuário criado com sucesso!");
+  alert("Usuário criado!");
 }
 </script>
 
