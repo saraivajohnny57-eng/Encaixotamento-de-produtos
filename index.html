@@ -2,458 +2,233 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<title>Sofisticatto</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#6a1b9a">
+<link rel="icon" href="icon-192.png">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Sofisticatto</title>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <style>
-body {
-  margin:0;
-  font-family: Arial;
-  background:#f4f6f9;
-  display:flex;
-}
-
-/* MENU */
-.sidebar {
-  width:220px;
-  background:#6a1b9a;
-  color:white;
-  height:100vh;
-  padding:20px;
-  display:none; /* 🔥 começa escondido */
-}
-
-.sidebar button {
-  width:100%;
-  margin-top:10px;
-  background:#8e24aa;
-  color:white;
-  border:none;
-  padding:10px;
-  border-radius:4px;
-}
-
-.main {
-  flex:1;
-  padding:20px;
-}
-
-.card {
-  background:white;
-  padding:20px;
-  border-radius:8px;
-}
-
-input, select {
-  width:100%;
-  padding:10px;
-  margin-top:8px;
-  border:1px solid #ccc;
-  border-radius:4px;
-}
-
-button {
-  margin-top:10px;
-  padding:10px;
-  cursor:pointer;
-}
-
-.hidden {
-  display:none;
-}
-
-table {
-  width:100%;
-  margin-top:10px;
-  border-collapse:collapse;
-}
-
-td, th {
-  border:1px solid #ddd;
-  padding:8px;
-}
-
-th {
-  background:#6a1b9a;
-  color:white;
-}
-
-.resultado {
-  margin-top:15px;
-  font-weight:bold;
-  color:#2e7d32;
-}
-
-/* 📱 RESPONSIVO */
-@media (max-width:768px) {
-  body {
-    flex-direction:column;
-  }
-
-  .sidebar {
-    width:100%;
-    height:auto;
-    flex-wrap:wrap;
-    justify-content:center;
-  }
-
-  .sidebar button {
-    width:45%;
-    margin:5px;
-  }
-
-  .main {
-    padding:10px;
-  }
-
-  table {
-    font-size:12px;
-  }
-}
+body { font-family: Arial; background:#f5f5f5; margin:0; }
+header { text-align:center; padding:20px; background:#fff; }
+.container { max-width:900px; margin:20px auto; background:#fff; padding:20px; border-radius:8px; }
+button { width:100%; padding:10px; margin-top:10px; border:none; background:#6a1b9a; color:#fff; }
+.secondary { background:#777; }
+.hidden { display:none; }
+input,select { width:100%; padding:10px; margin-top:5px; }
+table { width:100%; margin-top:10px; border-collapse:collapse; }
+td,th { border:1px solid #ddd; padding:6px; }
 </style>
 </head>
 
 <body>
 
-<!-- MENU -->
-<div class="sidebar" id="menu">
-  <h2>Sofisticatto</h2>
-  <p id="user-info"></p>
-
-  <button onclick="irPara('consulta')">Consulta</button>
-  <button onclick="irPara('cadastro')">Cadastro</button>
-  <button id="btn-usuarios" onclick="irPara('usuarios')" style="display:none;">Usuários</button>
-  <button onclick="logout()">Sair</button>
-</div>
-
-<div class="main">
+<header>
+<h2>Sofisticatto</h2>
+</header>
 
 <!-- LOGIN -->
-<div id="login" class="card">
-  <h2>Login</h2>
-  <input id="login-username" placeholder="Usuário">
-  <input id="login-password" type="password" placeholder="Senha">
-  <button onclick="login()">Entrar</button>
+<div class="container" id="login">
+<h3>Login</h3>
+<input id="user" placeholder="Usuário">
+<input id="pass" type="password" placeholder="Senha">
+<button onclick="login()">Entrar</button>
+<p id="msg"></p>
+</div>
+
+<!-- MENU -->
+<div class="container hidden" id="menu">
+<h3 id="info"></h3>
+
+<button onclick="ir('consulta')">Consulta</button>
+<button onclick="ir('cadastro')">Cadastro</button>
+<button id="btnUsers" onclick="ir('usuarios')" class="secondary">Usuários</button>
+<button onclick="logout()" class="secondary">Sair</button>
 </div>
 
 <!-- CONSULTA -->
-<div id="consulta" class="card hidden">
-  <h2>Consulta</h2>
+<div class="container hidden" id="consulta">
+<h3>Consulta</h3>
 
-  <input id="busca" placeholder="Código">
-  <input id="quantidade" placeholder="Quantidade">
+<input id="buscaCodigo" placeholder="Código">
+<input id="buscaQtd" placeholder="Quantidade">
 
-  <button onclick="buscar()">Buscar</button>
-  <button onclick="calcular()">Calcular</button>
+<button onclick="buscar()">Buscar</button>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Código</th>
-        <th>Descrição</th>
-        <th>Nº Caixa</th>
-        <th>Qtde/Caixa</th>
-      </tr>
-    </thead>
-    <tbody id="tabela"></tbody>
-  </table>
+<table>
+<thead>
+<tr>
+<th>Código</th><th>Descrição</th><th>Caixa</th><th>Qtde</th><th>Resultado</th>
+</tr>
+</thead>
+<tbody id="res"></tbody>
+</table>
 
-  <div id="resultado-calculo" class="resultado"></div>
+<button onclick="ir('menu')">Voltar</button>
 </div>
 
 <!-- CADASTRO -->
-<div id="cadastro" class="card hidden">
-  <h2>Cadastro de Produto</h2>
+<div class="container hidden" id="cadastro">
+<h3>Cadastro Produto</h3>
 
-  <input id="produto-id" type="hidden">
-  <input id="codigo" placeholder="Código">
-  <input id="descricao" placeholder="Descrição">
-  <input id="numero_caixa" placeholder="Número da Caixa">
-  <input id="qtde_caixa" placeholder="Qtde por Caixa">
+<input id="codigo" placeholder="Código">
+<input id="descricao" placeholder="Descrição">
+<input id="caixa" placeholder="Número da caixa">
+<input id="qtde" placeholder="Qtde por caixa">
 
-  <button onclick="salvar()">Salvar</button>
-  <button onclick="limpar()">Novo</button>
+<button onclick="salvar()">Salvar</button>
+<button onclick="listarProdutos()">Listar</button>
 
-  <h3>Lista de Produtos</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Código</th>
-        <th>Descrição</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody id="lista-produtos"></tbody>
-  </table>
+<table>
+<tbody id="listaProd"></tbody>
+</table>
+
+<button onclick="ir('menu')">Voltar</button>
 </div>
 
 <!-- USUÁRIOS -->
-<div id="usuarios" class="card hidden">
-  <h2>Usuários</h2>
+<div class="container hidden" id="usuarios">
+<h3>Usuários</h3>
 
-  <input id="usuario-id" type="hidden">
-  <input id="novo-user" placeholder="Usuário">
-  <input id="nova-senha" placeholder="Senha">
+<input id="novoUser" placeholder="Usuário">
+<input id="novaSenha" placeholder="Senha">
+<select id="role">
+<option value="user">Usuário</option>
+<option value="admin">Admin</option>
+</select>
 
-  <select id="role">
-    <option value="user">Usuário</option>
-    <option value="admin">Admin</option>
-  </select>
+<button onclick="criarUser()">Criar</button>
+<button onclick="listarUsers()">Listar</button>
 
-  <button onclick="salvarUsuario()">Salvar</button>
-  <button onclick="limparUsuario()">Novo</button>
+<table>
+<tbody id="listaUsers"></tbody>
+</table>
 
-  <h3>Lista de Usuários</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Usuário</th>
-        <th>Tipo</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody id="lista-usuarios"></tbody>
-  </table>
-</div>
-
+<button onclick="ir('menu')">Voltar</button>
 </div>
 
 <script>
 const supa = supabase.createClient(
-  "https://gymyltthcegplqzbujrv.supabase.co",
-  "sb_publishable_yiTEjwaD0gPFz3nHb22bJQ_kTa-DWjS"
+"https://gymyltthcegplqzbujrv.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5bXlsdHRoY2VncGxxemJ1anJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2OTg4NDcsImV4cCI6MjA5MjI3NDg0N30.mTIIKj1E6jMuAo1ZlQDAGOnNraXC5hjLQPqfHG6Aoaw"
 );
 
-let usuarioLogado = null;
+let userLogado = null;
 
-// 🔒 NAVEGAÇÃO
-function irPara(secao) {
-  if (!usuarioLogado) return;
-
-  ["consulta","cadastro","usuarios"].forEach(s =>
-    document.getElementById(s).classList.add("hidden")
-  );
-
-  document.getElementById(secao).classList.remove("hidden");
-
-  if (secao === "cadastro") carregarLista();
-  if (secao === "usuarios") carregarUsuarios();
+function ir(sec){
+["login","menu","consulta","cadastro","usuarios"].forEach(i=>{
+document.getElementById(i).classList.add("hidden");
+});
+document.getElementById(sec).classList.remove("hidden");
 }
 
-// 🔐 LOGIN
-async function login() {
-  const user = document.getElementById("login-username").value;
-  const pass = document.getElementById("login-password").value;
+async function login(){
+const u = user.value.trim();
+const p = pass.value.trim();
 
-  const { data } = await supa
-    .from("usuarios")
-    .select("*")
-    .ilike("username", user)
-    .eq("senha", pass)
-    .maybeSingle();
+const {data} = await supa
+.from("usuarios")
+.select("*")
+.eq("username",u)
+.eq("senha",p)
+.maybeSingle();
 
-  if (!data) return alert("Login inválido");
-
-  usuarioLogado = data;
-
-  document.getElementById("login").classList.add("hidden");
-  document.getElementById("menu").style.display = "block";
-
-  document.getElementById("user-info").textContent =
-    "Logado: " + data.username;
-
-  if (data.role === "admin") {
-    document.getElementById("btn-usuarios").style.display = "block";
-  }
+if(!data){
+msg.innerText="Login inválido";
+return;
 }
 
-// LOGOUT
-function logout() {
-  location.reload();
+userLogado=data;
+info.innerText=Logado: ${data.username} (${data.role});
+
+btnUsers.style.display = data.role=="admin"?"block":"none";
+
+ir("menu");
 }
 
-// BUSCAR
-async function buscar() {
-  const codigo = document.getElementById("busca").value;
-
-  const { data } = await supa.from("produtos").select("*").eq("codigo", codigo);
-
-  const tabela = document.getElementById("tabela");
-  tabela.innerHTML = "";
-
-  if (!data || data.length === 0) {
-    tabela.innerHTML = "<tr><td colspan='4'>Nenhum resultado</td></tr>";
-    return;
-  }
-
-  data.forEach(p => {
-    tabela.innerHTML += `
-      <tr>
-        <td>${p.codigo}</td>
-        <td>${p.descricao}</td>
-        <td>${p.numero_caixa}</td>
-        <td>${p.qtde_caixa}</td>
-      </tr>`;
-  });
+function logout(){
+userLogado=null;
+ir("login");
 }
 
-// CALCULAR
-async function calcular() {
-  const codigo = document.getElementById("busca").value;
-  const qtd = Number(document.getElementById("quantidade").value);
+async function buscar(){
+const cod = buscaCodigo.value;
+const qtd = parseInt(buscaQtd.value||0);
 
-  const { data } = await supa
-    .from("produtos")
-    .select("*")
-    .eq("codigo", codigo)
-    .maybeSingle();
+const {data} = await supa.from("produtos").select("*").eq("codigo",cod);
 
-  if (!data) return alert("Produto não encontrado");
+if(!data.length){ alert("Não encontrado"); return;}
 
-  const caixas = Math.floor(qtd / data.qtde_caixa);
-  const resto = qtd % data.qtde_caixa;
+let p=data[0];
+let result="";
 
-  let txt = caixas + " caixas";
-  if (resto > 0) txt += " + 1 aberta (" + resto + ")";
-
-  document.getElementById("resultado-calculo").textContent = txt;
+if(qtd>0){
+let cx=Math.floor(qtd/p.qtde_caixa);
+let resto=qtd%p.qtde_caixa;
+result=${cx} cx + ${resto} un;
 }
 
-// SALVAR PRODUTO
-async function salvar() {
-  const id = document.getElementById("produto-id").value;
-
-  const dados = {
-    codigo: document.getElementById("codigo").value,
-    descricao: document.getElementById("descricao").value,
-    numero_caixa: document.getElementById("numero_caixa").value,
-    qtde_caixa: document.getElementById("qtde_caixa").value
-  };
-
-  if (id) {
-    await supa.from("produtos").update(dados).eq("id", id);
-  } else {
-    await supa.from("produtos").insert(dados);
-  }
-
-  alert("Salvo!");
-  limpar();
-  carregarLista();
+res.innerHTML=`
+<tr>
+<td>${p.codigo}</td>
+<td>${p.descricao}</td>
+<td>${p.numero_caixa}</td>
+<td>${p.qtde_caixa}</td>
+<td>${result}</td>
+</tr>`;
 }
 
-// LISTA PRODUTOS
-async function carregarLista() {
-  const { data } = await supa.from("produtos").select("*");
-
-  const lista = document.getElementById("lista-produtos");
-  lista.innerHTML = "";
-
-  data.forEach(p => {
-    lista.innerHTML += `
-      <tr>
-        <td>${p.codigo}</td>
-        <td>${p.descricao}</td>
-        <td>
-          <button onclick="editar(${p.id})">Editar</button>
-          <button onclick="excluir(${p.id})">Excluir</button>
-        </td>
-      </tr>`;
-  });
+async function salvar(){
+await supa.from("produtos").insert({
+codigo:codigo.value,
+descricao:descricao.value,
+numero_caixa:caixa.value,
+qtde_caixa:qtde.value
+});
+alert("Salvo!");
 }
 
-// EDITAR
-async function editar(id) {
-  const { data } = await supa.from("produtos").select("*").eq("id", id).maybeSingle();
-
-  document.getElementById("produto-id").value = data.id;
-  document.getElementById("codigo").value = data.codigo;
-  document.getElementById("descricao").value = data.descricao;
-  document.getElementById("numero_caixa").value = data.numero_caixa;
-  document.getElementById("qtde_caixa").value = data.qtde_caixa;
+async function listarProdutos(){
+const {data}=await supa.from("produtos").select("*");
+listaProd.innerHTML="";
+data.forEach(p=>{
+listaProd.innerHTML+=`
+<tr>
+<td>${p.codigo}</td>
+<td>${p.descricao}</td>
+<td>${p.numero_caixa}</td>
+<td>${p.qtde_caixa}</td>
+</tr>`;
+});
 }
 
-// EXCLUIR
-async function excluir(id) {
-  if (!confirm("Excluir produto?")) return;
-
-  await supa.from("produtos").delete().eq("id", id);
-  carregarLista();
+async function criarUser(){
+await supa.from("usuarios").insert({
+username:novoUser.value,
+senha:novaSenha.value,
+role:role.value
+});
+alert("Criado!");
 }
 
-// LIMPAR
-function limpar() {
-  document.getElementById("produto-id").value = "";
-  document.getElementById("codigo").value = "";
-  document.getElementById("descricao").value = "";
-  document.getElementById("numero_caixa").value = "";
-  document.getElementById("qtde_caixa").value = "";
+async function listarUsers(){
+const {data}=await supa.from("usuarios").select("*");
+listaUsers.innerHTML="";
+data.forEach(u=>{
+listaUsers.innerHTML+=`
+<tr>
+<td>${u.username}</td>
+<td>${u.role}</td>
+</tr>`;
+});
 }
 
-// ===== USUÁRIOS =====
-
-async function carregarUsuarios() {
-  const { data } = await supa.from("usuarios").select("*");
-
-  const lista = document.getElementById("lista-usuarios");
-  lista.innerHTML = "";
-
-  data.forEach(u => {
-    lista.innerHTML += `
-      <tr>
-        <td>${u.username}</td>
-        <td>${u.role}</td>
-        <td>
-          <button onclick="editarUsuario(${u.id})">Editar</button>
-          <button onclick="excluirUsuario(${u.id})">Excluir</button>
-        </td>
-      </tr>`;
-  });
-}
-
-async function salvarUsuario() {
-  const id = document.getElementById("usuario-id").value;
-
-  const dados = {
-    username: document.getElementById("novo-user").value,
-    senha: document.getElementById("nova-senha").value,
-    role: document.getElementById("role").value
-  };
-
-  if (id) {
-    await supa.from("usuarios").update(dados).eq("id", id);
-  } else {
-    await supa.from("usuarios").insert(dados);
-  }
-
-  alert("Salvo!");
-  limparUsuario();
-  carregarUsuarios();
-}
-
-async function editarUsuario(id) {
-  const { data } = await supa.from("usuarios").select("*").eq("id", id).maybeSingle();
-
-  document.getElementById("usuario-id").value = data.id;
-  document.getElementById("novo-user").value = data.username;
-  document.getElementById("nova-senha").value = data.senha;
-  document.getElementById("role").value = data.role;
-}
-
-async function excluirUsuario(id) {
-  if (!confirm("Excluir usuário?")) return;
-
-  await supa.from("usuarios").delete().eq("id", id);
-  carregarUsuarios();
-}
-
-function limparUsuario() {
-  document.getElementById("usuario-id").value = "";
-  document.getElementById("novo-user").value = "";
-  document.getElementById("nova-senha").value = "";
-  document.getElementById("role").value = "user";
-}
+ir("login");
 </script>
 
 </body>
