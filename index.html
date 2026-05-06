@@ -4,12 +4,10 @@
 <meta charset="UTF-8">
 <title>Sofisticatto</title>
 
-<!-- PWA -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#6a1b9a">
-<link rel="icon" href="icon-192.png">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
@@ -17,8 +15,9 @@
 body { font-family: Arial; background:#f5f5f5; margin:0; }
 header { text-align:center; padding:20px; background:#fff; }
 .container { max-width:900px; margin:20px auto; background:#fff; padding:20px; border-radius:8px; }
-button { width:100%; padding:10px; margin-top:10px; border:none; background:#6a1b9a; color:#fff; }
+button { width:100%; padding:10px; margin-top:8px; border:none; background:#6a1b9a; color:#fff; }
 .secondary { background:#777; }
+.danger { background:#c62828; }
 .hidden { display:none; }
 input,select { width:100%; padding:10px; margin-top:5px; }
 table { width:100%; margin-top:10px; border-collapse:collapse; }
@@ -28,15 +27,13 @@ td,th { border:1px solid #ddd; padding:6px; }
 
 <body>
 
-<header>
-<h2>Sofisticatto</h2>
-</header>
+<header><h2>Sofisticatto</h2></header>
 
 <!-- LOGIN -->
 <div class="container" id="login">
 <h3>Login</h3>
-<input id="user" placeholder="Usuário">
-<input id="pass" type="password" placeholder="Senha">
+<input id="user">
+<input id="pass" type="password">
 <button onclick="login()">Entrar</button>
 <p id="msg"></p>
 </div>
@@ -46,7 +43,7 @@ td,th { border:1px solid #ddd; padding:6px; }
 <h3 id="info"></h3>
 
 <button onclick="ir('consulta')">Consulta</button>
-<button onclick="ir('cadastro')">Cadastro</button>
+<button onclick="ir('cadastro')">Cadastro Produto</button>
 <button id="btnUsers" onclick="ir('usuarios')" class="secondary">Usuários</button>
 <button onclick="logout()" class="secondary">Sair</button>
 </div>
@@ -62,9 +59,7 @@ td,th { border:1px solid #ddd; padding:6px; }
 
 <table>
 <thead>
-<tr>
-<th>Código</th><th>Descrição</th><th>Caixa</th><th>Qtde</th><th>Resultado</th>
-</tr>
+<tr><th>Código</th><th>Descrição</th><th>Caixa</th><th>Qtde</th><th>Resultado</th></tr>
 </thead>
 <tbody id="res"></tbody>
 </table>
@@ -76,9 +71,10 @@ td,th { border:1px solid #ddd; padding:6px; }
 <div class="container hidden" id="cadastro">
 <h3>Cadastro Produto</h3>
 
+<input id="idProd" type="hidden">
 <input id="codigo" placeholder="Código">
 <input id="descricao" placeholder="Descrição">
-<input id="caixa" placeholder="Número da caixa">
+<input id="caixa" placeholder="Número caixa">
 <input id="qtde" placeholder="Qtde por caixa">
 
 <button onclick="salvar()">Salvar</button>
@@ -95,6 +91,7 @@ td,th { border:1px solid #ddd; padding:6px; }
 <div class="container hidden" id="usuarios">
 <h3>Usuários</h3>
 
+<input id="idUser" type="hidden">
 <input id="novoUser" placeholder="Usuário">
 <input id="novaSenha" placeholder="Senha">
 <select id="role">
@@ -102,7 +99,7 @@ td,th { border:1px solid #ddd; padding:6px; }
 <option value="admin">Admin</option>
 </select>
 
-<button onclick="criarUser()">Criar</button>
+<button onclick="salvarUser()">Salvar</button>
 <button onclick="listarUsers()">Listar</button>
 
 <table>
@@ -120,6 +117,7 @@ const supa = supabase.createClient(
 
 let userLogado = null;
 
+// NAVEGAÇÃO
 function ir(sec){
 ["login","menu","consulta","cadastro","usuarios"].forEach(i=>{
 document.getElementById(i).classList.add("hidden");
@@ -127,21 +125,16 @@ document.getElementById(i).classList.add("hidden");
 document.getElementById(sec).classList.remove("hidden");
 }
 
+// LOGIN
 async function login(){
-const u = user.value.trim();
-const p = pass.value.trim();
-
 const {data} = await supa
 .from("usuarios")
 .select("*")
-.eq("username",u)
-.eq("senha",p)
+.eq("username",user.value.trim())
+.eq("senha",pass.value.trim())
 .maybeSingle();
 
-if(!data){
-msg.innerText="Login inválido";
-return;
-}
+if(!data){ msg.innerText="Login inválido"; return; }
 
 userLogado=data;
 info.innerText=Logado: ${data.username} (${data.role});
@@ -151,26 +144,28 @@ btnUsers.style.display = data.role=="admin"?"block":"none";
 ir("menu");
 }
 
+// LOGOUT
 function logout(){
 userLogado=null;
 ir("login");
 }
 
+// CONSULTA
 async function buscar(){
-const cod = buscaCodigo.value;
-const qtd = parseInt(buscaQtd.value||0);
-
-const {data} = await supa.from("produtos").select("*").eq("codigo",cod);
+const {data} = await supa.from("produtos")
+.select("*")
+.eq("codigo",buscaCodigo.value);
 
 if(!data.length){ alert("Não encontrado"); return;}
 
 let p=data[0];
-let result="";
+let qtd=parseInt(buscaQtd.value||0);
+let resul="";
 
-if(qtd>0){
+if(qtd){
 let cx=Math.floor(qtd/p.qtde_caixa);
 let resto=qtd%p.qtde_caixa;
-result=${cx} cx + ${resto} un;
+resul=${cx} cx + ${resto} un;
 }
 
 res.innerHTML=`
@@ -179,22 +174,36 @@ res.innerHTML=`
 <td>${p.descricao}</td>
 <td>${p.numero_caixa}</td>
 <td>${p.qtde_caixa}</td>
-<td>${result}</td>
+<td>${resul}</td>
 </tr>`;
 }
 
+// SALVAR PRODUTO
 async function salvar(){
+if(idProd.value){
+await supa.from("produtos").update({
+codigo:codigo.value,
+descricao:descricao.value,
+numero_caixa:caixa.value,
+qtde_caixa:qtde.value
+}).eq("id",idProd.value);
+}else{
 await supa.from("produtos").insert({
 codigo:codigo.value,
 descricao:descricao.value,
 numero_caixa:caixa.value,
 qtde_caixa:qtde.value
 });
-alert("Salvo!");
 }
 
+alert("Salvo!");
+listarProdutos();
+}
+
+// LISTAR PRODUTOS
 async function listarProdutos(){
 const {data}=await supa.from("produtos").select("*");
+
 listaProd.innerHTML="";
 data.forEach(p=>{
 listaProd.innerHTML+=`
@@ -203,29 +212,84 @@ listaProd.innerHTML+=`
 <td>${p.descricao}</td>
 <td>${p.numero_caixa}</td>
 <td>${p.qtde_caixa}</td>
+<td>
+<button onclick="editarProd(${p.id})">Editar</button>
+<button onclick="excluirProd(${p.id})" class="danger">Excluir</button>
+</td>
 </tr>`;
 });
 }
 
-async function criarUser(){
+// EDITAR PRODUTO
+async function editarProd(id){
+const {data}=await supa.from("produtos").select("*").eq("id",id).single();
+
+idProd.value=data.id;
+codigo.value=data.codigo;
+descricao.value=data.descricao;
+caixa.value=data.numero_caixa;
+qtde.value=data.qtde_caixa;
+}
+
+// EXCLUIR PRODUTO
+async function excluirProd(id){
+if(!confirm("Excluir?")) return;
+
+await supa.from("produtos").delete().eq("id",id);
+listarProdutos();
+}
+
+// USUÁRIOS
+async function salvarUser(){
+if(idUser.value){
+await supa.from("usuarios").update({
+username:novoUser.value,
+senha:novaSenha.value,
+role:role.value
+}).eq("id",idUser.value);
+}else{
 await supa.from("usuarios").insert({
 username:novoUser.value,
 senha:novaSenha.value,
 role:role.value
 });
-alert("Criado!");
+}
+
+alert("Salvo!");
+listarUsers();
 }
 
 async function listarUsers(){
 const {data}=await supa.from("usuarios").select("*");
+
 listaUsers.innerHTML="";
 data.forEach(u=>{
 listaUsers.innerHTML+=`
 <tr>
 <td>${u.username}</td>
 <td>${u.role}</td>
+<td>
+<button onclick="editarUser(${u.id})">Editar</button>
+<button onclick="excluirUser(${u.id})" class="danger">Excluir</button>
+</td>
 </tr>`;
 });
+}
+
+async function editarUser(id){
+const {data}=await supa.from("usuarios").select("*").eq("id",id).single();
+
+idUser.value=data.id;
+novoUser.value=data.username;
+novaSenha.value=data.senha;
+role.value=data.role;
+}
+
+async function excluirUser(id){
+if(!confirm("Excluir?")) return;
+
+await supa.from("usuarios").delete().eq("id",id);
+listarUsers();
 }
 
 ir("login");
