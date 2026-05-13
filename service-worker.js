@@ -1,7 +1,21 @@
-self.addEventListener("install", e => {
-  console.log("App instalado");
+const CACHE_NAME = "sofisticatto-v1";
+
+self.addEventListener("install", event => {
+  self.skipWaiting();
 });
 
-self.addEventListener("fetch", e => {
-  // aqui você pode futuramente adicionar cache
+self.addEventListener("activate", event => {
+  event.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    })
+  );
+
+  self.clients.claim();
 });
