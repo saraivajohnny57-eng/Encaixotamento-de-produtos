@@ -302,8 +302,11 @@ th{
   margin-top:15px;
   display:flex;
   justify-content:center;
+  align-items:center;
   flex-wrap:wrap;
   gap:10px;
+  width:100%;
+  clear:both;
 }
 
 .galeria-consulta img{
@@ -313,10 +316,37 @@ th{
   border-radius:14px;
   cursor:pointer;
   border:3px solid transparent;
+  background:#f5f2fb;
 }
 
 .galeria-consulta img.ativa{
   border-color:#5a4fa3;
+}
+
+@media(max-width:768px){
+  .galeria-consulta{
+    justify-content:flex-start;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    padding:10px 0;
+    margin-bottom:12px;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .galeria-consulta img{
+    width:68px;
+    min-width:68px;
+    height:68px;
+  }
+
+  .produto-imagem-grande{
+    margin-top:16px;
+  }
+
+  .produto-imagem-grande img{
+    width:100%;
+    max-height:none;
+  }
 }
 
 .modal-foto{
@@ -758,20 +788,25 @@ function mostrarImagemGrande(url, imagens){
   const box = document.getElementById("imagem-produto-grande");
   const galeria = document.getElementById("galeria-consulta");
 
+  const lista = Array.isArray(imagens) ? imagens.filter(Boolean) : [];
+  const principal = url || lista[0] || "";
+
   galeria.innerHTML = "";
 
-  if(url){
+  if(principal){
     box.style.display = "block";
-    box.innerHTML = `<img src="${url}">`;
+    box.innerHTML = `<img src="${principal}">`;
   }else{
     box.style.display = "none";
     box.innerHTML = "";
   }
 
-  if(imagens && imagens.length > 1){
-    imagens.forEach((img, index) => {
+  // Mostra as miniaturas também no celular, mesmo quando tiver só 2 fotos.
+  if(lista.length > 1){
+    lista.forEach((img, index) => {
+      const ativo = img === principal || (!principal && index === 0);
       galeria.innerHTML += `
-        <img class="${index === 0 ? "ativa" : ""}" src="${img}" onclick="trocarImagemConsulta('${img}', this)">
+        <img class="${ativo ? "ativa" : ""}" src="${img}" onclick="trocarImagemConsulta('${img}', this)">
       `;
     });
   }
@@ -786,7 +821,9 @@ function trocarImagemConsulta(url, elemento){
     img.classList.remove("ativa");
   });
 
-  elemento.classList.add("ativa");
+  if(elemento){
+    elemento.classList.add("ativa");
+  }
 }
 
 async function buscar() {
