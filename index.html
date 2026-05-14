@@ -574,7 +574,7 @@ function selecionarImagem(event){
   const urlTemporaria = URL.createObjectURL(arquivo);
 
   document.getElementById("preview-foto").innerHTML =
-    <img src="${urlTemporaria}">;
+    `<img src="${urlTemporaria}">`;
 }
 
 async function uploadImagemProduto(){
