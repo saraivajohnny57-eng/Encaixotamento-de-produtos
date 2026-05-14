@@ -618,7 +618,7 @@ function mostrarImagemGrande(url){
 
   if(url){
     box.style.display = "block";
-    box.innerHTML = <img src="${url}">;
+    box.innerHTML = `<img src="${url}">`;
   }else{
     box.style.display = "none";
     box.innerHTML = "";
@@ -773,7 +773,7 @@ async function editar(id) {
 
   if(imagemAtualUrl){
     document.getElementById("preview-foto").innerHTML =
-      <img src="${imagemAtualUrl}">;
+      `<img src="${imagemAtualUrl}">`;
   }else{
     document.getElementById("preview-foto").innerHTML = "+";
   }
