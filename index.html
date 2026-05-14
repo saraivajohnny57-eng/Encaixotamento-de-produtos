@@ -607,7 +607,7 @@ async function uploadImagemProduto(){
 
 function miniatura(url){
   if(url){
-    return <img class="thumb" src="${url}">;
+    return `<img class="thumb" src="${url}">`;
   }
 
   return <div class="sem-foto">+</div>;
