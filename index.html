@@ -261,6 +261,64 @@ th{
   box-shadow:0 0 15px rgba(0,0,0,.08);
 }
 
+.galeria-preview{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:15px;
+}
+
+.galeria-item{
+  width:86px;
+  height:86px;
+  border-radius:16px;
+  overflow:hidden;
+  position:relative;
+  background:#f5f2fb;
+  border:1px solid #ede9fb;
+}
+
+.galeria-item img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.galeria-item button{
+  position:absolute;
+  top:2px;
+  right:2px;
+  width:24px;
+  height:24px;
+  padding:0;
+  border-radius:50%;
+  background:#c0392b;
+  color:white;
+  font-size:12px;
+  margin:0;
+}
+
+.galeria-consulta{
+  margin-top:15px;
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.galeria-consulta img{
+  width:70px;
+  height:70px;
+  object-fit:cover;
+  border-radius:14px;
+  cursor:pointer;
+  border:3px solid transparent;
+}
+
+.galeria-consulta img.ativa{
+  border-color:#5a4fa3;
+}
+
 .modal-foto{
   position:fixed;
   inset:0;
@@ -387,6 +445,7 @@ th{
   </div>
 
   <div id="imagem-produto-grande" class="produto-imagem-grande"></div>
+  <div id="galeria-consulta" class="galeria-consulta"></div>
 
   <div id="resultado-calculo" class="resultado"></div>
 </div>
@@ -400,12 +459,15 @@ th{
     </div>
 
     <div class="foto-texto">
-      Clique no quadro para tirar foto ou escolher da galeria.
+      Clique no quadro para tirar foto ou escolher imagens da galeria.<br>
+      A primeira imagem será a foto principal do produto.
     </div>
   </div>
 
-  <input type="file" id="input-galeria" accept="image/*" class="hidden" onchange="selecionarImagem(event)">
-  <input type="file" id="input-camera" accept="image/*" capture="environment" class="hidden" onchange="selecionarImagem(event)">
+  <div id="galeria-preview" class="galeria-preview"></div>
+
+  <input type="file" id="input-galeria" accept="image/*" multiple class="hidden" onchange="selecionarImagens(event)">
+  <input type="file" id="input-camera" accept="image/*" capture="environment" class="hidden" onchange="selecionarImagens(event)">
 
   <input id="produto-id" type="hidden">
   <input id="codigo" placeholder="Código">
@@ -482,8 +544,8 @@ const supa = supabase.createClient(
 );
 
 let usuarioLogado = null;
-let imagemSelecionada = null;
-let imagemAtualUrl = "";
+let imagensSelecionadas = [];
+let imagensAtuais = [];
 
 function irPara(secao) {
   if (!usuarioLogado) return;
@@ -564,38 +626,106 @@ function abrirCamera(){
   document.getElementById("input-camera").click();
 }
 
-function selecionarImagem(event){
-  const arquivo = event.target.files[0];
+function normalizarImagens(valor, imagemUrl){
+  let imagens = [];
 
-  if(!arquivo) return;
-
-  imagemSelecionada = arquivo;
-
-  const urlTemporaria = URL.createObjectURL(arquivo);
-
-  document.getElementById("preview-foto").innerHTML =
-    `<img src="${urlTemporaria}">`;
-}
-
-async function uploadImagemProduto(){
-  if(!imagemSelecionada){
-    return imagemAtualUrl || "";
+  if(Array.isArray(valor)){
+    imagens = valor;
+  }else if(typeof valor === "string" && valor.trim()){
+    try{
+      const convertido = JSON.parse(valor);
+      if(Array.isArray(convertido)){
+        imagens = convertido;
+      }else{
+        imagens = [valor];
+      }
+    }catch(e){
+      imagens = [valor];
+    }
   }
 
-  const extensao = imagemSelecionada.name.split(".").pop();
+  if(imagemUrl && !imagens.includes(imagemUrl)){
+    imagens.unshift(imagemUrl);
+  }
+
+  return imagens.filter(Boolean);
+}
+
+function imagensParaBanco(lista){
+  return JSON.stringify(lista.filter(Boolean));
+}
+
+function selecionarImagens(event){
+  const arquivos = Array.from(event.target.files || []);
+
+  if(arquivos.length === 0) return;
+
+  imagensSelecionadas = imagensSelecionadas.concat(arquivos);
+
+  atualizarPreviewImagens();
+}
+
+function atualizarPreviewImagens(){
+  const previewPrincipal = document.getElementById("preview-foto");
+  const galeria = document.getElementById("galeria-preview");
+
+  const urlsAtuais = imagensAtuais.map(url => ({tipo:"url", valor:url}));
+  const novosArquivos = imagensSelecionadas.map(file => ({tipo:"file", valor:file}));
+  const todas = urlsAtuais.concat(novosArquivos);
+
+  galeria.innerHTML = "";
+
+  if(todas.length === 0){
+    previewPrincipal.innerHTML = "+";
+    return;
+  }
+
+  const primeira = todas[0];
+
+  if(primeira.tipo === "url"){
+    previewPrincipal.innerHTML = `<img src="${primeira.valor}">`;
+  }else{
+    previewPrincipal.innerHTML = `<img src="${URL.createObjectURL(primeira.valor)}">`;
+  }
+
+  todas.forEach((item, index) => {
+    const src = item.tipo === "url" ? item.valor : URL.createObjectURL(item.valor);
+
+    galeria.innerHTML += `
+      <div class="galeria-item">
+        <img src="${src}">
+        <button onclick="removerImagemPreview(${index})">×</button>
+      </div>
+    `;
+  });
+}
+
+function removerImagemPreview(index){
+  const totalAtuais = imagensAtuais.length;
+
+  if(index < totalAtuais){
+    imagensAtuais.splice(index, 1);
+  }else{
+    imagensSelecionadas.splice(index - totalAtuais, 1);
+  }
+
+  atualizarPreviewImagens();
+}
+
+async function uploadImagemUnica(arquivo){
+  const extensao = arquivo.name.split(".").pop();
   const nomeArquivo = "produto_" + Date.now() + "_" + Math.random().toString(36).substring(2) + "." + extensao;
 
   const { error } = await supa.storage
     .from("produtos")
-    .upload(nomeArquivo, imagemSelecionada, {
+    .upload(nomeArquivo, arquivo, {
       cacheControl: "3600",
       upsert: true
     });
 
   if(error){
     console.log(error);
-    alert("Erro ao enviar imagem");
-    return imagemAtualUrl || "";
+    throw error;
   }
 
   const { data } = supa.storage
@@ -603,6 +733,17 @@ async function uploadImagemProduto(){
     .getPublicUrl(nomeArquivo);
 
   return data.publicUrl;
+}
+
+async function uploadImagensProduto(){
+  const urlsNovas = [];
+
+  for(const arquivo of imagensSelecionadas){
+    const url = await uploadImagemUnica(arquivo);
+    urlsNovas.push(url);
+  }
+
+  return imagensAtuais.concat(urlsNovas);
 }
 
 function miniatura(url){
@@ -613,8 +754,11 @@ function miniatura(url){
   return `<div class="sem-foto">+</div>`;
 }
 
-function mostrarImagemGrande(url){
+function mostrarImagemGrande(url, imagens){
   const box = document.getElementById("imagem-produto-grande");
+  const galeria = document.getElementById("galeria-consulta");
+
+  galeria.innerHTML = "";
 
   if(url){
     box.style.display = "block";
@@ -623,6 +767,26 @@ function mostrarImagemGrande(url){
     box.style.display = "none";
     box.innerHTML = "";
   }
+
+  if(imagens && imagens.length > 1){
+    imagens.forEach((img, index) => {
+      galeria.innerHTML += `
+        <img class="${index === 0 ? "ativa" : ""}" src="${img}" onclick="trocarImagemConsulta('${img}', this)">
+      `;
+    });
+  }
+}
+
+function trocarImagemConsulta(url, elemento){
+  const box = document.getElementById("imagem-produto-grande");
+  box.style.display = "block";
+  box.innerHTML = `<img src="${url}">`;
+
+  document.querySelectorAll(".galeria-consulta img").forEach(img => {
+    img.classList.remove("ativa");
+  });
+
+  elemento.classList.add("ativa");
 }
 
 async function buscar() {
@@ -641,7 +805,7 @@ async function buscar() {
 
   const tabela = document.getElementById("tabela");
   tabela.innerHTML = "";
-  mostrarImagemGrande("");
+  mostrarImagemGrande("", []);
 
   if (!data || data.length === 0) {
     tabela.innerHTML = "<tr><td colspan='5'>Nenhum resultado</td></tr>";
@@ -651,7 +815,7 @@ async function buscar() {
   data.forEach(p => {
     tabela.innerHTML += `
       <tr>
-        <td>${miniatura(p.imagem_url)}</td>
+        <td>${miniatura(normalizarImagens(p.imagens, p.imagem_url)[0] || "")}</td>
         <td>${p.codigo}</td>
         <td>${p.descricao}</td>
         <td>${p.numero_caixa}</td>
@@ -659,7 +823,7 @@ async function buscar() {
       </tr>`;
   });
 
-  mostrarImagemGrande(data[0].imagem_url);
+  mostrarImagemGrande(normalizarImagens(data[0].imagens, data[0].imagem_url)[0] || "", normalizarImagens(data[0].imagens, data[0].imagem_url));
 }
 
 async function calcular() {
@@ -687,20 +851,30 @@ async function calcular() {
   }
 
   document.getElementById("resultado-calculo").textContent = txt;
-  mostrarImagemGrande(data.imagem_url);
+  mostrarImagemGrande(normalizarImagens(data.imagens, data.imagem_url)[0] || "", normalizarImagens(data.imagens, data.imagem_url));
 }
 
 async function salvar() {
   const id = document.getElementById("produto-id").value;
 
-  const imagemUrl = await uploadImagemProduto();
+  let todasImagens = [];
+
+  try{
+    todasImagens = await uploadImagensProduto();
+  }catch(e){
+    alert("Erro ao enviar imagem");
+    return;
+  }
+
+  const imagemPrincipal = todasImagens[0] || "";
 
   const dados = {
     codigo: document.getElementById("codigo").value,
     descricao: document.getElementById("descricao").value,
     numero_caixa: document.getElementById("numero_caixa").value,
     qtde_caixa: document.getElementById("qtde_caixa").value,
-    imagem_url: imagemUrl
+    imagem_url: imagemPrincipal,
+    imagens: imagensParaBanco(todasImagens)
   };
 
   let error;
@@ -744,7 +918,7 @@ async function carregarLista() {
   data.forEach(p => {
     lista.innerHTML += `
       <tr>
-        <td>${miniatura(p.imagem_url)}</td>
+        <td>${miniatura(normalizarImagens(p.imagens, p.imagem_url)[0] || "")}</td>
         <td>${p.codigo}</td>
         <td>${p.descricao}</td>
         <td>
@@ -768,15 +942,10 @@ async function editar(id) {
   document.getElementById("numero_caixa").value = data.numero_caixa;
   document.getElementById("qtde_caixa").value = data.qtde_caixa;
 
-  imagemAtualUrl = data.imagem_url || "";
-  imagemSelecionada = null;
+  imagensAtuais = normalizarImagens(data.imagens, data.imagem_url);
+  imagensSelecionadas = [];
 
-  if(imagemAtualUrl){
-    document.getElementById("preview-foto").innerHTML =
-      `<img src="${imagemAtualUrl}">`;
-  }else{
-    document.getElementById("preview-foto").innerHTML = "+";
-  }
+  atualizarPreviewImagens();
 }
 
 async function excluir(id) {
@@ -803,12 +972,13 @@ function limpar() {
   document.getElementById("numero_caixa").value = "";
   document.getElementById("qtde_caixa").value = "";
 
-  imagemSelecionada = null;
-  imagemAtualUrl = "";
+  imagensSelecionadas = [];
+  imagensAtuais = [];
 
   document.getElementById("input-galeria").value = "";
   document.getElementById("input-camera").value = "";
   document.getElementById("preview-foto").innerHTML = "+";
+  document.getElementById("galeria-preview").innerHTML = "";
 }
 
 async function carregarUsuarios() {
