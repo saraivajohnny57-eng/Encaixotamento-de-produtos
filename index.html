@@ -8,12 +8,7 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial,sans-serif;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 
 body{
   background:#f5f2fb;
@@ -128,13 +123,14 @@ table{
   width:100%;
   margin-top:20px;
   border-collapse:collapse;
-  min-width:700px;
+  min-width:760px;
 }
 
 th,td{
   border-bottom:1px solid #eee;
   padding:12px;
   text-align:left;
+  vertical-align:middle;
 }
 
 th{
@@ -198,10 +194,104 @@ th{
   border-radius:15px;
 }
 
+.foto-box{
+  width:120px;
+  height:120px;
+  border-radius:22px;
+  background:#f5f2fb;
+  border:2px dashed #b8afe6;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#5a4fa3;
+  font-size:45px;
+  cursor:pointer;
+  overflow:hidden;
+  margin-bottom:15px;
+}
+
+.foto-box img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.foto-area{
+  display:flex;
+  gap:20px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.foto-texto{
+  color:#6b63aa;
+  font-size:14px;
+}
+
+.thumb{
+  width:55px;
+  height:55px;
+  border-radius:12px;
+  object-fit:cover;
+  background:#f5f2fb;
+}
+
+.sem-foto{
+  width:55px;
+  height:55px;
+  border-radius:12px;
+  background:#f5f2fb;
+  color:#5a4fa3;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:25px;
+}
+
+.produto-imagem-grande{
+  margin-top:20px;
+  display:none;
+  text-align:center;
+}
+
+.produto-imagem-grande img{
+  max-width:100%;
+  max-height:420px;
+  border-radius:25px;
+  box-shadow:0 0 15px rgba(0,0,0,.08);
+}
+
+.modal-foto{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+  padding:20px;
+}
+
+.modal-box{
+  background:white;
+  padding:25px;
+  border-radius:25px;
+  width:320px;
+  max-width:100%;
+  text-align:center;
+}
+
+.modal-box h3{
+  color:#5a4fa3;
+  margin-bottom:15px;
+}
+
+.modal-box button{
+  width:100%;
+}
+
 @media(max-width:768px){
-  body{
-    display:block;
-  }
+  body{display:block}
 
   .sidebar{
     width:100%;
@@ -227,7 +317,7 @@ th{
   }
 
   table{
-    min-width:650px;
+    min-width:720px;
   }
 
   .login-box{
@@ -285,6 +375,7 @@ th{
     <table>
       <thead>
         <tr>
+          <th>Foto</th>
           <th>Código</th>
           <th>Descrição</th>
           <th>Nº Caixa</th>
@@ -295,11 +386,26 @@ th{
     </table>
   </div>
 
+  <div id="imagem-produto-grande" class="produto-imagem-grande"></div>
+
   <div id="resultado-calculo" class="resultado"></div>
 </div>
 
 <div id="cadastro" class="card hidden">
   <h2>Cadastro de Produto</h2>
+
+  <div class="foto-area">
+    <div class="foto-box" onclick="abrirOpcoesFoto()" id="preview-foto">
+      +
+    </div>
+
+    <div class="foto-texto">
+      Clique no quadro para tirar foto ou escolher da galeria.
+    </div>
+  </div>
+
+  <input type="file" id="input-galeria" accept="image/*" class="hidden" onchange="selecionarImagem(event)">
+  <input type="file" id="input-camera" accept="image/*" capture="environment" class="hidden" onchange="selecionarImagem(event)">
 
   <input id="produto-id" type="hidden">
   <input id="codigo" placeholder="Código">
@@ -316,6 +422,7 @@ th{
     <table>
       <thead>
         <tr>
+          <th>Foto</th>
           <th>Código</th>
           <th>Descrição</th>
           <th>Ações</th>
@@ -359,6 +466,15 @@ th{
 
 </div>
 
+<div id="modal-foto" class="modal-foto">
+  <div class="modal-box">
+    <h3>Adicionar foto</h3>
+    <button onclick="abrirCamera()">📷 Tirar foto</button>
+    <button onclick="abrirGaleria()">🖼️ Buscar na galeria</button>
+    <button onclick="fecharOpcoesFoto()" style="background:#c0392b;">Cancelar</button>
+  </div>
+</div>
+
 <script>
 const supa = supabase.createClient(
   "https://gymyltthcegplqzbujrv.supabase.co",
@@ -366,6 +482,8 @@ const supa = supabase.createClient(
 );
 
 let usuarioLogado = null;
+let imagemSelecionada = null;
+let imagemAtualUrl = "";
 
 function irPara(secao) {
   if (!usuarioLogado) return;
@@ -381,7 +499,7 @@ function irPara(secao) {
 }
 
 async function login() {
-  const botao = event.target;
+  const botao = document.querySelector(".login-box button");
   botao.disabled = true;
   botao.textContent = "Entrando...";
 
@@ -428,6 +546,85 @@ function logout() {
   location.reload();
 }
 
+function abrirOpcoesFoto(){
+  document.getElementById("modal-foto").style.display = "flex";
+}
+
+function fecharOpcoesFoto(){
+  document.getElementById("modal-foto").style.display = "none";
+}
+
+function abrirGaleria(){
+  fecharOpcoesFoto();
+  document.getElementById("input-galeria").click();
+}
+
+function abrirCamera(){
+  fecharOpcoesFoto();
+  document.getElementById("input-camera").click();
+}
+
+function selecionarImagem(event){
+  const arquivo = event.target.files[0];
+
+  if(!arquivo) return;
+
+  imagemSelecionada = arquivo;
+
+  const urlTemporaria = URL.createObjectURL(arquivo);
+
+  document.getElementById("preview-foto").innerHTML =
+    <img src="${urlTemporaria}">;
+}
+
+async function uploadImagemProduto(){
+  if(!imagemSelecionada){
+    return imagemAtualUrl || "";
+  }
+
+  const extensao = imagemSelecionada.name.split(".").pop();
+  const nomeArquivo = "produto_" + Date.now() + "_" + Math.random().toString(36).substring(2) + "." + extensao;
+
+  const { error } = await supa.storage
+    .from("produtos")
+    .upload(nomeArquivo, imagemSelecionada, {
+      cacheControl: "3600",
+      upsert: true
+    });
+
+  if(error){
+    console.log(error);
+    alert("Erro ao enviar imagem");
+    return imagemAtualUrl || "";
+  }
+
+  const { data } = supa.storage
+    .from("produtos")
+    .getPublicUrl(nomeArquivo);
+
+  return data.publicUrl;
+}
+
+function miniatura(url){
+  if(url){
+    return <img class="thumb" src="${url}">;
+  }
+
+  return <div class="sem-foto">+</div>;
+}
+
+function mostrarImagemGrande(url){
+  const box = document.getElementById("imagem-produto-grande");
+
+  if(url){
+    box.style.display = "block";
+    box.innerHTML = <img src="${url}">;
+  }else{
+    box.style.display = "none";
+    box.innerHTML = "";
+  }
+}
+
 async function buscar() {
   const codigo = document.getElementById("busca").value;
 
@@ -444,21 +641,25 @@ async function buscar() {
 
   const tabela = document.getElementById("tabela");
   tabela.innerHTML = "";
+  mostrarImagemGrande("");
 
   if (!data || data.length === 0) {
-    tabela.innerHTML = "<tr><td colspan='4'>Nenhum resultado</td></tr>";
+    tabela.innerHTML = "<tr><td colspan='5'>Nenhum resultado</td></tr>";
     return;
   }
 
   data.forEach(p => {
     tabela.innerHTML += `
       <tr>
+        <td>${miniatura(p.imagem_url)}</td>
         <td>${p.codigo}</td>
         <td>${p.descricao}</td>
         <td>${p.numero_caixa}</td>
         <td>${p.qtde_caixa}</td>
       </tr>`;
   });
+
+  mostrarImagemGrande(data[0].imagem_url);
 }
 
 async function calcular() {
@@ -486,16 +687,20 @@ async function calcular() {
   }
 
   document.getElementById("resultado-calculo").textContent = txt;
+  mostrarImagemGrande(data.imagem_url);
 }
 
 async function salvar() {
   const id = document.getElementById("produto-id").value;
 
+  const imagemUrl = await uploadImagemProduto();
+
   const dados = {
     codigo: document.getElementById("codigo").value,
     descricao: document.getElementById("descricao").value,
     numero_caixa: document.getElementById("numero_caixa").value,
-    qtde_caixa: document.getElementById("qtde_caixa").value
+    qtde_caixa: document.getElementById("qtde_caixa").value,
+    imagem_url: imagemUrl
   };
 
   let error;
@@ -539,6 +744,7 @@ async function carregarLista() {
   data.forEach(p => {
     lista.innerHTML += `
       <tr>
+        <td>${miniatura(p.imagem_url)}</td>
         <td>${p.codigo}</td>
         <td>${p.descricao}</td>
         <td>
@@ -561,6 +767,16 @@ async function editar(id) {
   document.getElementById("descricao").value = data.descricao;
   document.getElementById("numero_caixa").value = data.numero_caixa;
   document.getElementById("qtde_caixa").value = data.qtde_caixa;
+
+  imagemAtualUrl = data.imagem_url || "";
+  imagemSelecionada = null;
+
+  if(imagemAtualUrl){
+    document.getElementById("preview-foto").innerHTML =
+      <img src="${imagemAtualUrl}">;
+  }else{
+    document.getElementById("preview-foto").innerHTML = "+";
+  }
 }
 
 async function excluir(id) {
@@ -586,6 +802,13 @@ function limpar() {
   document.getElementById("descricao").value = "";
   document.getElementById("numero_caixa").value = "";
   document.getElementById("qtde_caixa").value = "";
+
+  imagemSelecionada = null;
+  imagemAtualUrl = "";
+
+  document.getElementById("input-galeria").value = "";
+  document.getElementById("input-camera").value = "";
+  document.getElementById("preview-foto").innerHTML = "+";
 }
 
 async function carregarUsuarios() {
