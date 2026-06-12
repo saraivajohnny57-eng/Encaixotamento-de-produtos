@@ -123,7 +123,7 @@ table{
   width:100%;
   margin-top:20px;
   border-collapse:collapse;
-  min-width:760px;
+  min-width:820px;
 }
 
 th,td{
@@ -688,8 +688,11 @@ function imagensParaBanco(lista){
 
 function selecionarImagens(event){
   const arquivos = Array.from(event.target.files || []);
+
   if(arquivos.length === 0) return;
+
   imagensSelecionadas = imagensSelecionadas.concat(arquivos);
+
   atualizarPreviewImagens();
 }
 
@@ -711,9 +714,9 @@ function atualizarPreviewImagens(){
   const primeira = todas[0];
 
   if(primeira.tipo === "url"){
-    previewPrincipal.innerHTML = <img src="${primeira.valor}">;
+    previewPrincipal.innerHTML = `<img src="${primeira.valor}">`;
   }else{
-    previewPrincipal.innerHTML = <img src="${URL.createObjectURL(primeira.valor)}">;
+    previewPrincipal.innerHTML = `<img src="${URL.createObjectURL(primeira.valor)}">`;
   }
 
   todas.forEach((item, index) => {
@@ -776,10 +779,10 @@ async function uploadImagensProduto(){
 
 function miniatura(url){
   if(url){
-    return <img class="thumb" src="${url}">;
+    return `<img class="thumb" src="${url}">`;
   }
 
-  return <div class="sem-foto">+</div>;
+  return `<div class="sem-foto">+</div>`;
 }
 
 function mostrarImagemGrande(url, imagens){
@@ -793,7 +796,7 @@ function mostrarImagemGrande(url, imagens){
 
   if(principal){
     box.style.display = "block";
-    box.innerHTML = <img src="${principal}">;
+    box.innerHTML = `<img src="${principal}">`;
   }else{
     box.style.display = "none";
     box.innerHTML = "";
@@ -812,7 +815,7 @@ function mostrarImagemGrande(url, imagens){
 function trocarImagemConsulta(url, elemento){
   const box = document.getElementById("imagem-produto-grande");
   box.style.display = "block";
-  box.innerHTML = <img src="${url}">;
+  box.innerHTML = `<img src="${url}">`;
 
   document.querySelectorAll(".galeria-consulta img").forEach(img => {
     img.classList.remove("ativa");
