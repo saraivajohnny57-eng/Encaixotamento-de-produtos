@@ -405,7 +405,7 @@ th{
   }
 
   table{
-    min-width:720px;
+    min-width:820px;
   }
 
   .login-box{
@@ -468,6 +468,7 @@ th{
           <th>Descrição</th>
           <th>Nº Caixa</th>
           <th>Qtde/Caixa</th>
+          <th>Ações</th>
         </tr>
       </thead>
       <tbody id="tabela"></tbody>
@@ -687,11 +688,8 @@ function imagensParaBanco(lista){
 
 function selecionarImagens(event){
   const arquivos = Array.from(event.target.files || []);
-
   if(arquivos.length === 0) return;
-
   imagensSelecionadas = imagensSelecionadas.concat(arquivos);
-
   atualizarPreviewImagens();
 }
 
@@ -713,9 +711,9 @@ function atualizarPreviewImagens(){
   const primeira = todas[0];
 
   if(primeira.tipo === "url"){
-    previewPrincipal.innerHTML = `<img src="${primeira.valor}">`;
+    previewPrincipal.innerHTML = <img src="${primeira.valor}">;
   }else{
-    previewPrincipal.innerHTML = `<img src="${URL.createObjectURL(primeira.valor)}">`;
+    previewPrincipal.innerHTML = <img src="${URL.createObjectURL(primeira.valor)}">;
   }
 
   todas.forEach((item, index) => {
@@ -778,10 +776,10 @@ async function uploadImagensProduto(){
 
 function miniatura(url){
   if(url){
-    return `<img class="thumb" src="${url}">`;
+    return <img class="thumb" src="${url}">;
   }
 
-  return `<div class="sem-foto">+</div>`;
+  return <div class="sem-foto">+</div>;
 }
 
 function mostrarImagemGrande(url, imagens){
@@ -795,13 +793,12 @@ function mostrarImagemGrande(url, imagens){
 
   if(principal){
     box.style.display = "block";
-    box.innerHTML = `<img src="${principal}">`;
+    box.innerHTML = <img src="${principal}">;
   }else{
     box.style.display = "none";
     box.innerHTML = "";
   }
 
-  // Mostra as miniaturas também no celular, mesmo quando tiver só 2 fotos.
   if(lista.length > 1){
     lista.forEach((img, index) => {
       const ativo = img === principal || (!principal && index === 0);
@@ -815,7 +812,7 @@ function mostrarImagemGrande(url, imagens){
 function trocarImagemConsulta(url, elemento){
   const box = document.getElementById("imagem-produto-grande");
   box.style.display = "block";
-  box.innerHTML = `<img src="${url}">`;
+  box.innerHTML = <img src="${url}">;
 
   document.querySelectorAll(".galeria-consulta img").forEach(img => {
     img.classList.remove("ativa");
@@ -845,7 +842,7 @@ async function buscar() {
   mostrarImagemGrande("", []);
 
   if (!data || data.length === 0) {
-    tabela.innerHTML = "<tr><td colspan='5'>Nenhum resultado</td></tr>";
+    tabela.innerHTML = "<tr><td colspan='6'>Nenhum resultado</td></tr>";
     return;
   }
 
@@ -857,10 +854,18 @@ async function buscar() {
         <td>${p.descricao}</td>
         <td>${p.numero_caixa}</td>
         <td>${p.qtde_caixa}</td>
+        <td>
+          <button onclick="editarPelaConsulta(${p.id})">Editar</button>
+        </td>
       </tr>`;
   });
 
   mostrarImagemGrande(normalizarImagens(data[0].imagens, data[0].imagem_url)[0] || "", normalizarImagens(data[0].imagens, data[0].imagem_url));
+}
+
+async function editarPelaConsulta(id){
+  await editar(id);
+  irPara("cadastro");
 }
 
 async function calcular() {
