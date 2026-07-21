@@ -3,1126 +3,151 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Sofisticatto</title>
-
+<title>Sofisticatto - Sistema Unificado</title>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-
-body{
-  background:#f5f2fb;
-  display:flex;
-  min-height:100vh;
-  color:#4d4694;
-}
-
-.sidebar{
-  width:250px;
-  background:white;
-  padding:25px;
-  box-shadow:0 0 15px rgba(0,0,0,.08);
-  display:none;
-  flex-direction:column;
-  justify-content:space-between;
-}
-
-.sidebar h2{
-  font-size:38px;
-  font-style:italic;
-  font-weight:300;
-  color:#5a4fa3;
-  margin-bottom:10px;
-}
-
-.sidebar p{
-  background:#ede9fb;
-  padding:12px;
-  border-radius:15px;
-  margin-bottom:15px;
-  font-size:14px;
-}
-
-.sidebar button{
-  width:100%;
-  margin-top:10px;
-  background:#ede9fb;
-  color:#4d4694;
-  border:none;
-  padding:14px;
-  border-radius:15px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-.sidebar button:hover{
-  background:#5a4fa3;
-  color:white;
-}
-
-.main{
-  flex:1;
-  padding:30px;
-  overflow:auto;
-}
-
-.card{
-  background:white;
-  padding:25px;
-  border-radius:25px;
-  box-shadow:0 0 15px rgba(0,0,0,.05);
-  margin-bottom:25px;
-}
-
-.card h2{
-  margin-bottom:20px;
-  color:#5a4fa3;
-}
-
-.card h3{
-  margin-top:25px;
-  margin-bottom:15px;
-  color:#5a4fa3;
-}
-
-input,select{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border:none;
-  border-radius:12px;
-  background:#f5f2fb;
-  outline:none;
-}
-
-button{
-  margin-top:10px;
-  padding:12px 18px;
-  cursor:pointer;
-  border:none;
-  border-radius:12px;
-  background:#5a4fa3;
-  color:white;
-  font-weight:bold;
-}
-
-button:hover{
-  opacity:.9;
-}
-
-.hidden{
-  display:none!important;
-}
-
-.table-wrap{
-  width:100%;
-  overflow-x:auto;
-}
-
-table{
-  width:100%;
-  margin-top:20px;
-  border-collapse:collapse;
-  min-width:820px;
-}
-
-th,td{
-  border-bottom:1px solid #eee;
-  padding:12px;
-  text-align:left;
-  vertical-align:middle;
-}
-
-th{
-  background:#5a4fa3;
-  color:white;
-}
-
-.resultado{
-  margin-top:20px;
-  font-weight:bold;
-  color:#27ae60;
-  font-size:18px;
-  background:#edfdf3;
-  padding:15px;
-  border-radius:15px;
-}
-
-.login-container{
-  position:fixed;
-  inset:0;
-  background:#f5f2fb;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:20px;
-  z-index:999;
-}
-
-.login-box{
-  background:white;
-  padding:40px;
-  border-radius:30px;
-  width:350px;
-  max-width:100%;
-  box-shadow:0 0 20px rgba(0,0,0,.08);
-}
-
-.login-box h1{
-  text-align:center;
-  font-size:42px;
-  font-style:italic;
-  font-weight:300;
-  color:#5a4fa3;
-}
-
-.login-box p{
-  text-align:center;
-  letter-spacing:5px;
-  color:#9c92d9;
-  margin-bottom:25px;
-  font-size:12px;
-}
-
-.login-box input{
-  margin-bottom:10px;
-}
-
-.login-box button{
-  width:100%;
-  padding:15px;
-  border-radius:15px;
-}
-
-.foto-box{
-  width:120px;
-  height:120px;
-  border-radius:22px;
-  background:#f5f2fb;
-  border:2px dashed #b8afe6;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#5a4fa3;
-  font-size:45px;
-  cursor:pointer;
-  overflow:hidden;
-  margin-bottom:15px;
-}
-
-.foto-box img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-.foto-area{
-  display:flex;
-  gap:20px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-
-.foto-texto{
-  color:#6b63aa;
-  font-size:14px;
-}
-
-.thumb{
-  width:55px;
-  height:55px;
-  border-radius:12px;
-  object-fit:cover;
-  background:#f5f2fb;
-}
-
-.sem-foto{
-  width:55px;
-  height:55px;
-  border-radius:12px;
-  background:#f5f2fb;
-  color:#5a4fa3;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:25px;
-}
-
-.produto-imagem-grande{
-  margin-top:20px;
-  display:none;
-  text-align:center;
-}
-
-.produto-imagem-grande img{
-  max-width:100%;
-  max-height:420px;
-  border-radius:25px;
-  box-shadow:0 0 15px rgba(0,0,0,.08);
-}
-
-.galeria-preview{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-top:15px;
-}
-
-.galeria-item{
-  width:86px;
-  height:86px;
-  border-radius:16px;
-  overflow:hidden;
-  position:relative;
-  background:#f5f2fb;
-  border:1px solid #ede9fb;
-}
-
-.galeria-item img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-.galeria-item button{
-  position:absolute;
-  top:2px;
-  right:2px;
-  width:24px;
-  height:24px;
-  padding:0;
-  border-radius:50%;
-  background:#c0392b;
-  color:white;
-  font-size:12px;
-  margin:0;
-}
-
-.galeria-consulta{
-  margin-top:15px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:10px;
-  width:100%;
-  clear:both;
-}
-
-.galeria-consulta img{
-  width:70px;
-  height:70px;
-  object-fit:cover;
-  border-radius:14px;
-  cursor:pointer;
-  border:3px solid transparent;
-  background:#f5f2fb;
-}
-
-.galeria-consulta img.ativa{
-  border-color:#5a4fa3;
-}
-
-@media(max-width:768px){
-  .galeria-consulta{
-    justify-content:flex-start;
-    flex-wrap:nowrap;
-    overflow-x:auto;
-    padding:10px 0;
-    margin-bottom:12px;
-    -webkit-overflow-scrolling:touch;
-  }
-
-  .galeria-consulta img{
-    width:68px;
-    min-width:68px;
-    height:68px;
-  }
-
-  .produto-imagem-grande{
-    margin-top:16px;
-  }
-
-  .produto-imagem-grande img{
-    width:100%;
-    max-height:none;
-  }
-}
-
-.modal-foto{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.45);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:1000;
-  padding:20px;
-}
-
-.modal-box{
-  background:white;
-  padding:25px;
-  border-radius:25px;
-  width:320px;
-  max-width:100%;
-  text-align:center;
-}
-
-.modal-box h3{
-  color:#5a4fa3;
-  margin-bottom:15px;
-}
-
-.modal-box button{
-  width:100%;
-}
-
-@media(max-width:768px){
-  body{display:block}
-
-  .sidebar{
-    width:100%;
-    height:auto;
-    padding:15px;
-  }
-
-  .sidebar h2{
-    font-size:30px;
-  }
-
-  .main{
-    padding:15px;
-  }
-
-  .card{
-    padding:18px;
-    border-radius:20px;
-  }
-
-  .sidebar button{
-    padding:12px;
-  }
-
-  table{
-    min-width:820px;
-  }
-
-  .login-box{
-    padding:30px;
-  }
-
-  .login-box h1{
-    font-size:34px;
-  }
-}
+:root{--roxo:#5a4fa3;--roxo2:#ede9fb;--fundo:#f5f2fb;--texto:#4d4694;--verde:#27ae60;--vermelho:#c0392b;--cinza:#8c83c9}
+body{background:var(--fundo);display:flex;min-height:100vh;color:var(--texto)}
+.sidebar{width:280px;background:#fff;padding:22px;box-shadow:0 0 18px rgba(0,0,0,.08);display:none;flex-direction:column;justify-content:space-between;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar h1{font-size:35px;font-style:italic;font-weight:300;color:var(--roxo)}
+.sidebar small{display:block;letter-spacing:2px;color:#9c92d9;margin:3px 0 15px}
+.sidebar .user-box{background:var(--roxo2);padding:12px;border-radius:15px;font-size:13px;line-height:1.5;margin-bottom:15px}
+.menu-title{font-size:11px;font-weight:bold;letter-spacing:1.5px;color:#9c92d9;margin:18px 5px 5px;text-transform:uppercase}
+.sidebar button{width:100%;margin-top:7px;background:var(--roxo2);color:var(--texto);border:0;padding:13px;border-radius:14px;cursor:pointer;font-weight:bold;text-align:left}
+.sidebar button:hover,.sidebar button.ativo{background:var(--roxo);color:#fff}.sidebar .btn-sair{background:#fff1f1;color:var(--vermelho)}
+.main{flex:1;padding:28px;overflow:auto}.card{background:#fff;padding:24px;border-radius:24px;box-shadow:0 0 15px rgba(0,0,0,.05);margin-bottom:24px}.card h2,.card h3{color:var(--roxo);margin-bottom:15px}.hidden{display:none!important}
+label{display:block;margin-top:11px;font-weight:bold;color:var(--roxo);font-size:14px}input,select{width:100%;padding:12px;margin-top:7px;border:0;border-radius:12px;background:var(--fundo);outline:none;color:var(--texto)}input[readonly]{background:var(--roxo2);font-weight:bold}
+button{margin-top:10px;padding:11px 16px;cursor:pointer;border:0;border-radius:12px;background:var(--roxo);color:#fff;font-weight:bold}button:hover{opacity:.9}.btn-light{background:var(--roxo2);color:var(--texto)}.btn-danger{background:var(--vermelho)}.btn-ok{background:var(--verde)}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.top-title{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.table-wrap{width:100%;overflow-x:auto;border-radius:15px;-webkit-overflow-scrolling:touch}table{width:100%;margin-top:16px;border-collapse:collapse;min-width:850px}th,td{border-bottom:1px solid #eee;padding:11px;text-align:left;vertical-align:middle;font-size:14px}th{background:var(--roxo);color:#fff;white-space:nowrap}td button{padding:8px 11px;margin:2px}
+.login-container{position:fixed;inset:0;background:var(--fundo);display:flex;justify-content:center;align-items:center;padding:20px;z-index:999}.login-box{background:#fff;padding:38px;border-radius:30px;width:380px;max-width:100%;box-shadow:0 0 22px rgba(0,0,0,.09)}.login-box h1{text-align:center;font-size:40px;font-style:italic;font-weight:300;color:var(--roxo)}.login-box p{text-align:center;letter-spacing:3px;color:#9c92d9;margin-bottom:22px;font-size:11px}.login-box button{width:100%;padding:14px}
+.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--roxo2);font-weight:bold;font-size:12px}.resultado{margin-top:18px;font-weight:bold;color:var(--verde);font-size:18px;background:#edfdf3;padding:14px;border-radius:14px}.muted{color:var(--cinza);font-size:13px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin:15px 0}.stat{background:var(--fundo);padding:16px;border-radius:17px;border-left:5px solid var(--roxo)}.stat span{font-size:12px;font-weight:bold;color:var(--cinza)}.stat b{display:block;font-size:23px;margin-top:7px}.bar-area{min-width:220px;background:var(--roxo2);border-radius:999px;overflow:hidden;height:15px}.bar{height:15px;background:var(--roxo);border-radius:999px}
+.foto-area{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.foto-box{width:115px;height:115px;border-radius:21px;background:var(--fundo);border:2px dashed #b8afe6;display:flex;align-items:center;justify-content:center;font-size:42px;cursor:pointer;overflow:hidden}.foto-box img{width:100%;height:100%;object-fit:cover}.galeria-preview{display:flex;flex-wrap:wrap;gap:9px;margin-top:13px}.galeria-item{width:82px;height:82px;border-radius:15px;overflow:hidden;position:relative;background:var(--fundo)}.galeria-item img{width:100%;height:100%;object-fit:cover}.galeria-item button{position:absolute;top:2px;right:2px;width:23px;height:23px;padding:0;border-radius:50%;background:var(--vermelho);margin:0}.thumb{width:52px;height:52px;border-radius:11px;object-fit:cover;background:var(--fundo)}.sem-foto{width:52px;height:52px;border-radius:11px;background:var(--fundo);display:flex;align-items:center;justify-content:center;font-size:23px}.produto-imagem-grande{text-align:center;margin-top:17px;display:none}.produto-imagem-grande img{max-width:100%;max-height:390px;border-radius:22px}.galeria-consulta{margin-top:12px;display:flex;gap:9px;flex-wrap:wrap}.galeria-consulta img{width:65px;height:65px;object-fit:cover;border-radius:12px;border:3px solid transparent;cursor:pointer}.galeria-consulta img.ativa{border-color:var(--roxo)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}.modal-box{background:#fff;padding:24px;border-radius:23px;width:340px;max-width:100%;text-align:center}.modal-box button{width:100%}.check-card{background:var(--fundo);padding:13px;border-radius:14px;margin-top:10px}.check-row{display:flex;align-items:center;gap:9px}.check-row input{width:auto;margin:0}.subsection{margin-top:15px;padding:15px;background:#faf9fe;border:1px solid #eee8ff;border-radius:16px}
+@media(max-width:900px){body{display:block}.sidebar{position:relative;width:100%;height:auto;padding:15px}.main{padding:14px}.card{padding:17px;border-radius:19px}.grid-2,.grid-3,.grid-4,.stats{grid-template-columns:1fr}.sidebar h1{font-size:29px}.sidebar button{text-align:center}table{min-width:820px}.galeria-consulta{flex-wrap:nowrap;overflow-x:auto}.galeria-consulta img{min-width:65px}}
+@media print{body{display:block;background:#fff;color:#000}.sidebar,.login-container,.no-print,.card:not(.print-card){display:none!important}.main{padding:0}.print-card{display:block!important;box-shadow:none;border-radius:0;padding:0}.print-area{display:block!important}@page{size:A4 landscape;margin:8mm}table{min-width:0;width:100%;font-size:10px}th,td{padding:4px;border:1px solid #bbb;color:#000}th{background:#eee!important;color:#000!important}}
 </style>
 </head>
-
 <body>
-
 <div class="sidebar" id="menu">
   <div>
-    <h2>Sofisticatto</h2>
-    <p id="user-info"></p>
-
-    <hr style="margin:15px 0;border:none;border-top:1px solid #eee;">
-
-    <button onclick="irPara('consulta')">Consulta</button>
-    <button onclick="irPara('cadastro')">Cadastro</button>
-    <button id="btn-usuarios" onclick="irPara('usuarios')" style="display:none;">Usuários</button>
+    <h1>Sofisticatto</h1><small>SISTEMA UNIFICADO</small>
+    <div class="user-box" id="user-info"></div>
+    <div id="menu-encaixotamento" class="hidden">
+      <div class="menu-title">Encaixotamento</div>
+      <button id="btn-consulta" onclick="irPara('consulta')">📦 Consulta e Cálculo</button>
+      <button id="btn-cadastro" onclick="irPara('cadastro')">🧴 Produtos e Fotos</button>
+    </div>
+    <div id="menu-producao" class="hidden">
+      <div class="menu-title">Produção</div>
+      <button id="btn-registro" onclick="irPara('registro')">🏭 Registro de Produção</button>
+      <button id="btn-historico" onclick="irPara('historico')">📋 Histórico</button>
+      <button id="btn-balanceamento" onclick="irPara('balanceamento')">🏆 Balanceamento</button>
+    </div>
+    <div id="menu-admin" class="hidden">
+      <div class="menu-title">Administração</div>
+      <button id="btn-usuarios" onclick="irPara('usuarios')">👥 Usuários e Permissões</button>
+    </div>
   </div>
-
-  <button onclick="logout()">Sair</button>
+  <button class="btn-sair" onclick="logout()">Sair</button>
 </div>
-
 <div class="main">
+  <div id="login" class="login-container"><div class="login-box"><h1>Sofisticatto</h1><p>SISTEMA UNIFICADO</p><input id="login-username" placeholder="Usuário" autocomplete="username"><input id="login-password" type="password" placeholder="Senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')fazerLogin()"><button onclick="fazerLogin()">Entrar</button><div class="muted" style="text-align:center;margin-top:10px">Use seu usuário já cadastrado.</div></div></div>
 
-<div id="login" class="login-container">
-  <div class="login-box">
-    <h1>Sofisticatto</h1>
-    <p>COSMÉTICOS</p>
-
-    <input id="login-username" placeholder="Usuário">
-    <input id="login-password" type="password" placeholder="Senha">
-
-    <button onclick="fazerLogin()">Entrar</button>
-  </div>
-</div>
-
-<div id="consulta" class="card hidden">
-  <h2>Consulta</h2>
-
-  <input id="busca" placeholder="Código">
-  <input id="quantidade" placeholder="Quantidade">
-
-  <button onclick="buscar()">Buscar</button>
-  <button onclick="calcular()">Calcular</button>
-
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Foto</th>
-          <th>Código</th>
-          <th>Descrição</th>
-          <th>Nº Caixa</th>
-          <th>Qtde/Caixa</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="tabela"></tbody>
-    </table>
+  <div id="consulta" class="card hidden">
+    <h2>Consulta e cálculo de caixas</h2>
+    <div class="grid-2"><div><label>Código:</label><input id="enc-busca" placeholder="Ex.: 31"></div><div><label>Quantidade:</label><input id="enc-quantidade" type="number" min="0" placeholder="Ex.: 200"></div></div>
+    <div class="actions"><button onclick="buscarEncaixotamento()">Buscar</button><button class="btn-ok" onclick="calcularCaixas()">Calcular caixas</button></div>
+    <div class="table-wrap"><table><thead><tr><th>Foto</th><th>Código</th><th>Descrição</th><th>Nº Caixa</th><th>Qtde/Caixa</th><th>Ações</th></tr></thead><tbody id="enc-tabela"></tbody></table></div>
+    <div id="enc-imagem-grande" class="produto-imagem-grande"></div><div id="enc-galeria" class="galeria-consulta"></div><div id="enc-resultado" class="resultado hidden"></div>
   </div>
 
-  <div id="imagem-produto-grande" class="produto-imagem-grande"></div>
-  <div id="galeria-consulta" class="galeria-consulta"></div>
-
-  <div id="resultado-calculo" class="resultado"></div>
-</div>
-
-<div id="cadastro" class="card hidden">
-  <h2>Cadastro de Produto</h2>
-
-  <div class="foto-area">
-    <div class="foto-box" onclick="abrirOpcoesFoto()" id="preview-foto">
-      +
-    </div>
-
-    <div class="foto-texto">
-      Clique no quadro para tirar foto ou escolher imagens da galeria.<br>
-      A primeira imagem será a foto principal do produto.
-    </div>
+  <div id="cadastro" class="card hidden">
+    <h2>Tabela única de produtos</h2>
+    <div class="foto-area"><div class="foto-box" onclick="abrirModalFoto()" id="prod-preview">+</div><div class="muted">Fotos, dados do encaixotamento e informações da produção ficam no mesmo produto.</div></div>
+    <div id="prod-galeria-preview" class="galeria-preview"></div>
+    <input type="file" id="prod-input-galeria" accept="image/*" multiple class="hidden" onchange="selecionarImagens(event)"><input type="file" id="prod-input-camera" accept="image/*" capture="environment" class="hidden" onchange="selecionarImagens(event)">
+    <input id="prod-id" type="hidden">
+    <div class="grid-2"><div><label>Código:</label><input id="prod-codigo" placeholder="Código"></div><div><label>Descrição:</label><input id="prod-descricao" placeholder="Descrição"></div></div>
+    <div class="grid-4"><div><label>Número da caixa:</label><input id="prod-numero-caixa" placeholder="Número da caixa"></div><div><label>Quantidade por caixa:</label><input id="prod-qtde-caixa" type="number" min="0" placeholder="Quantidade"></div><div><label>Categoria:</label><input id="prod-categoria" placeholder="Categoria"></div><div><label>Status:</label><select id="prod-status"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select></div></div>
+    <div class="actions"><button onclick="salvarProdutoUnificado()">Salvar Produto</button><button class="btn-light" onclick="limparProdutoUnificado()">Novo/Limpar</button><button class="btn-light" onclick="carregarProdutosUnificados()">Atualizar Lista</button></div>
+    <h3>Produtos cadastrados</h3><div class="table-wrap"><table><thead><tr><th>Foto</th><th>Código</th><th>Descrição</th><th>Caixa</th><th>Qtd/Cx</th><th>Categoria</th><th>Status</th><th>Ações</th></tr></thead><tbody id="prod-lista"></tbody></table></div>
   </div>
 
-  <div id="galeria-preview" class="galeria-preview"></div>
-
-  <input type="file" id="input-galeria" accept="image/*" multiple class="hidden" onchange="selecionarImagens(event)">
-  <input type="file" id="input-camera" accept="image/*" capture="environment" class="hidden" onchange="selecionarImagens(event)">
-
-  <input id="produto-id" type="hidden">
-  <input id="codigo" placeholder="Código">
-  <input id="descricao" placeholder="Descrição">
-  <input id="numero_caixa" placeholder="Número da Caixa">
-  <input id="qtde_caixa" placeholder="Qtde por Caixa">
-
-  <button onclick="salvar()">Salvar</button>
-  <button onclick="limpar()">Novo</button>
-
-  <h3>Lista de Produtos</h3>
-
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Foto</th>
-          <th>Código</th>
-          <th>Descrição</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="lista-produtos"></tbody>
-    </table>
+  <div id="registro" class="card hidden">
+    <div class="top-title"><h2>Registro de entrada de produção</h2><span class="pill" id="data-hoje-label"></span></div><input id="ent-id" type="hidden">
+    <div class="grid-2"><div><label>Código:</label><input id="ent-codigo" placeholder="Código" onblur="buscarProdutoRegistro()"></div><div><label>Descrição:</label><input id="ent-descricao" readonly placeholder="Automático"></div></div>
+    <div class="grid-3"><div><label>Nº Pedido:</label><input id="ent-pedido" placeholder="Pedido"></div><div><label>Nº OP:</label><input id="ent-op" placeholder="OP"></div><div><label>Lote do produto:</label><input id="ent-lote" placeholder="Lote"></div></div>
+    <div class="check-card"><label class="check-row"><input type="checkbox" id="ent-usar-lote-interno" onchange="alternarLoteInterno()"> Informar lote interno agora (opcional)</label><div id="ent-lote-interno-area" class="hidden"><label>Lote interno:</label><input id="ent-lote-interno" placeholder="Pode ser preenchido ou editado depois"></div></div>
+    <div class="grid-4"><div><label>Quantidade:</label><input id="ent-qt" type="number" step="0.01" placeholder="Quantidade"></div><div><label>Tipo:</label><select id="ent-tipo"><option value="Entrada cheia">Entrada cheia</option><option value="Entrada parcial">Entrada parcial</option></select></div><div><label>Data:</label><input id="ent-data" type="date" onchange="atualizarMesRegistro()"></div><div><label>Mês:</label><input id="ent-mes" readonly></div></div>
+    <div class="actions"><button onclick="salvarEntrada()">Salvar Registro</button><button class="btn-light" onclick="limparEntrada()">Novo/Limpar</button></div>
   </div>
-</div>
 
-<div id="usuarios" class="card hidden">
-  <h2>Usuários</h2>
-
-  <input id="usuario-id" type="hidden">
-  <input id="novo-user" placeholder="Usuário">
-  <input id="nova-senha" placeholder="Senha">
-
-  <select id="role">
-    <option value="user">Usuário</option>
-    <option value="admin">Admin</option>
-  </select>
-
-  <button onclick="salvarUsuario()">Salvar</button>
-  <button onclick="limparUsuario()">Novo</button>
-
-  <h3>Lista de Usuários</h3>
-
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Usuário</th>
-          <th>Tipo</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="lista-usuarios"></tbody>
-    </table>
+  <div id="historico" class="card hidden">
+    <h2>Histórico de produção</h2><div class="grid-4"><div><label>Data inicial:</label><input id="hist-inicio" type="date"></div><div><label>Data final:</label><input id="hist-fim" type="date"></div><div><label>Código:</label><input id="hist-codigo"></div><div><label>Produto:</label><input id="hist-nome"></div></div><div class="grid-4"><div><label>Pedido:</label><input id="hist-pedido"></div><div><label>OP:</label><input id="hist-op"></div><div><label>Lote:</label><input id="hist-lote"></div><div><label>Lote interno:</label><input id="hist-lote-interno"></div></div>
+    <div class="actions no-print"><button onclick="pesquisarHistorico()">Pesquisar</button><button class="btn-light" onclick="limparHistorico()">Limpar</button><button onclick="imprimirHistorico()">Imprimir A4 deitada</button></div>
+    <div class="stats"><div class="stat"><span>Total de fichas</span><b id="total-fichas">0</b></div><div class="stat"><span>Total quantidade</span><b id="total-quantidade">0</b></div><div class="stat"><span>Produtos diferentes</span><b id="total-produtos">0</b></div><div class="stat"><span>Entrada parcial</span><b id="total-parcial">0</b></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Data</th><th>Mês</th><th>Código</th><th>Descrição</th><th>Pedido</th><th>OP</th><th>Lote</th><th>Lote interno</th><th>Qt</th><th>Tipo</th><th>Responsável</th><th>Ações</th></tr></thead><tbody id="hist-lista"></tbody></table></div>
   </div>
-</div>
 
-</div>
-
-<div id="modal-foto" class="modal-foto">
-  <div class="modal-box">
-    <h3>Adicionar foto</h3>
-    <button onclick="abrirCamera()">📷 Tirar foto</button>
-    <button onclick="abrirGaleria()">🖼️ Buscar na galeria</button>
-    <button onclick="fecharOpcoesFoto()" style="background:#c0392b;">Cancelar</button>
+  <div id="balanceamento" class="card hidden">
+    <h2>Balanceamento / ranking</h2><div class="grid-3"><div><label>Data inicial:</label><input id="bal-inicio" type="date"></div><div><label>Data final:</label><input id="bal-fim" type="date"></div><div><label>Produto:</label><input id="bal-termo" placeholder="Nome ou código"></div></div><div class="actions"><button onclick="carregarBalanceamento()">Atualizar Ranking</button><button class="btn-light" onclick="limparBalanceamento()">Limpar</button></div>
+    <div class="stats"><div class="stat"><span>Produto líder</span><b id="bal-lider" style="font-size:17px">-</b></div><div class="stat"><span>Qtd líder</span><b id="bal-qtd">0</b></div><div class="stat"><span>Total geral</span><b id="bal-total">0</b></div><div class="stat"><span>Produtos no ranking</span><b id="bal-count">0</b></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Ranking</th><th>Código</th><th>Produto</th><th>Quantidade</th><th>Representação</th></tr></thead><tbody id="bal-lista"></tbody></table></div>
   </div>
+
+  <div id="usuarios" class="card hidden"><h2>Usuários e permissões</h2><input id="user-id" type="hidden"><div class="grid-3"><div><label>Usuário:</label><input id="user-username"></div><div><label>Senha:</label><input id="user-senha" type="text"></div><div><label>Tipo:</label><select id="user-role"><option value="user">Usuário</option><option value="admin">Administrador</option></select></div></div><div class="grid-2"><label class="check-card check-row"><input type="checkbox" id="user-acesso-encaixotamento"> Acesso ao Encaixotamento</label><label class="check-card check-row"><input type="checkbox" id="user-acesso-producao"> Acesso à Produção</label></div><div class="actions"><button onclick="salvarUsuario()">Salvar Usuário</button><button class="btn-light" onclick="limparUsuario()">Novo</button></div><div class="table-wrap"><table><thead><tr><th>Usuário</th><th>Tipo</th><th>Encaixotamento</th><th>Produção</th><th>Ações</th></tr></thead><tbody id="user-lista"></tbody></table></div></div>
+
+  <div id="print-card" class="card print-card hidden"><div id="print-area" class="print-area"></div></div>
 </div>
+
+<div id="modal-foto" class="modal"><div class="modal-box"><h3>Adicionar fotos</h3><button onclick="abrirCamera()">📷 Tirar foto</button><button onclick="abrirGaleria()">🖼️ Escolher na galeria</button><button class="btn-danger" onclick="fecharModalFoto()">Cancelar</button></div></div>
 
 <script>
-const supa = supabase.createClient(
-  "https://gymyltthcegplqzbujrv.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5bXlsdHRoY2VncGxxemJ1anJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2OTg4NDcsImV4cCI6MjA5MjI3NDg0N30.mTIIKj1E6jMuAo1ZlQDAGOnNraXC5hjLQPqfHG6Aoaw"
-);
-
-let usuarioLogado = null;
-let imagensSelecionadas = [];
-let imagensAtuais = [];
-
-function irPara(secao) {
-  if (!usuarioLogado) return;
-
-  ["consulta","cadastro","usuarios"].forEach(s => {
-    document.getElementById(s).classList.add("hidden");
-  });
-
-  document.getElementById(secao).classList.remove("hidden");
-
-  if (secao === "cadastro") carregarLista();
-  if (secao === "usuarios") carregarUsuarios();
-}
-
-async function fazerLogin() {
-  const botao = document.querySelector(".login-box button");
-  botao.disabled = true;
-  botao.textContent = "Entrando...";
-
-  const user = document.getElementById("login-username").value;
-  const pass = document.getElementById("login-password").value;
-
-  const { data, error } = await supa
-    .from("usuarios")
-    .select("*")
-    .eq("username", user)
-    .eq("senha", pass)
-    .maybeSingle();
-
-  botao.disabled = false;
-  botao.textContent = "Entrar";
-
-  if (error) {
-    alert("Erro no login");
-    console.log(error);
-    return;
-  }
-
-  if (!data) {
-    alert("Login inválido");
-    return;
-  }
-
-  usuarioLogado = data;
-
-  document.getElementById("login").classList.add("hidden");
-  document.getElementById("menu").style.display = "flex";
-
-  document.getElementById("user-info").textContent =
-    "Logado: " + data.username;
-
-  if (data.role === "admin") {
-    document.getElementById("btn-usuarios").style.display = "block";
-  }
-
-  irPara("consulta");
-}
-
-function logout() {
-  location.reload();
-}
-
-function abrirOpcoesFoto(){
-  document.getElementById("modal-foto").style.display = "flex";
-}
-
-function fecharOpcoesFoto(){
-  document.getElementById("modal-foto").style.display = "none";
-}
-
-function abrirGaleria(){
-  fecharOpcoesFoto();
-  document.getElementById("input-galeria").click();
-}
-
-function abrirCamera(){
-  fecharOpcoesFoto();
-  document.getElementById("input-camera").click();
-}
-
-function normalizarImagens(valor, imagemUrl){
-  let imagens = [];
-
-  if(Array.isArray(valor)){
-    imagens = valor;
-  }else if(typeof valor === "string" && valor.trim()){
-    try{
-      const convertido = JSON.parse(valor);
-      if(Array.isArray(convertido)){
-        imagens = convertido;
-      }else{
-        imagens = [valor];
-      }
-    }catch(e){
-      imagens = [valor];
-    }
-  }
-
-  if(imagemUrl && !imagens.includes(imagemUrl)){
-    imagens.unshift(imagemUrl);
-  }
-
-  return imagens.filter(Boolean);
-}
-
-function imagensParaBanco(lista){
-  return JSON.stringify(lista.filter(Boolean));
-}
-
-function selecionarImagens(event){
-  const arquivos = Array.from(event.target.files || []);
-
-  if(arquivos.length === 0) return;
-
-  imagensSelecionadas = imagensSelecionadas.concat(arquivos);
-
-  atualizarPreviewImagens();
-}
-
-function atualizarPreviewImagens(){
-  const previewPrincipal = document.getElementById("preview-foto");
-  const galeria = document.getElementById("galeria-preview");
-
-  const urlsAtuais = imagensAtuais.map(url => ({tipo:"url", valor:url}));
-  const novosArquivos = imagensSelecionadas.map(file => ({tipo:"file", valor:file}));
-  const todas = urlsAtuais.concat(novosArquivos);
-
-  galeria.innerHTML = "";
-
-  if(todas.length === 0){
-    previewPrincipal.innerHTML = "+";
-    return;
-  }
-
-  const primeira = todas[0];
-
-  if(primeira.tipo === "url"){
-    previewPrincipal.innerHTML = `<img src="${primeira.valor}">`;
-  }else{
-    previewPrincipal.innerHTML = `<img src="${URL.createObjectURL(primeira.valor)}">`;
-  }
-
-  todas.forEach((item, index) => {
-    const src = item.tipo === "url" ? item.valor : URL.createObjectURL(item.valor);
-
-    galeria.innerHTML += `
-      <div class="galeria-item">
-        <img src="${src}">
-        <button onclick="removerImagemPreview(${index})">×</button>
-      </div>
-    `;
-  });
-}
-
-function removerImagemPreview(index){
-  const totalAtuais = imagensAtuais.length;
-
-  if(index < totalAtuais){
-    imagensAtuais.splice(index, 1);
-  }else{
-    imagensSelecionadas.splice(index - totalAtuais, 1);
-  }
-
-  atualizarPreviewImagens();
-}
-
-async function uploadImagemUnica(arquivo){
-  const extensao = arquivo.name.split(".").pop();
-  const nomeArquivo = "produto_" + Date.now() + "_" + Math.random().toString(36).substring(2) + "." + extensao;
-
-  const { error } = await supa.storage
-    .from("produtos")
-    .upload(nomeArquivo, arquivo, {
-      cacheControl: "3600",
-      upsert: true
-    });
-
-  if(error){
-    console.log(error);
-    throw error;
-  }
-
-  const { data } = supa.storage
-    .from("produtos")
-    .getPublicUrl(nomeArquivo);
-
-  return data.publicUrl;
-}
-
-async function uploadImagensProduto(){
-  const urlsNovas = [];
-
-  for(const arquivo of imagensSelecionadas){
-    const url = await uploadImagemUnica(arquivo);
-    urlsNovas.push(url);
-  }
-
-  return imagensAtuais.concat(urlsNovas);
-}
-
-function miniatura(url){
-  if(url){
-    return `<img class="thumb" src="${url}">`;
-  }
-
-  return `<div class="sem-foto">+</div>`;
-}
-
-function mostrarImagemGrande(url, imagens){
-  const box = document.getElementById("imagem-produto-grande");
-  const galeria = document.getElementById("galeria-consulta");
-
-  const lista = Array.isArray(imagens) ? imagens.filter(Boolean) : [];
-  const principal = url || lista[0] || "";
-
-  galeria.innerHTML = "";
-
-  if(principal){
-    box.style.display = "block";
-    box.innerHTML = `<img src="${principal}">`;
-  }else{
-    box.style.display = "none";
-    box.innerHTML = "";
-  }
-
-  if(lista.length > 1){
-    lista.forEach((img, index) => {
-      const ativo = img === principal || (!principal && index === 0);
-      galeria.innerHTML += `
-        <img class="${ativo ? "ativa" : ""}" src="${img}" onclick="trocarImagemConsulta('${img}', this)">
-      `;
-    });
-  }
-}
-
-function trocarImagemConsulta(url, elemento){
-  const box = document.getElementById("imagem-produto-grande");
-  box.style.display = "block";
-  box.innerHTML = `<img src="${url}">`;
-
-  document.querySelectorAll(".galeria-consulta img").forEach(img => {
-    img.classList.remove("ativa");
-  });
-
-  if(elemento){
-    elemento.classList.add("ativa");
-  }
-}
-
-async function buscar() {
-  const codigo = document.getElementById("busca").value;
-
-  const { data, error } = await supa
-    .from("produtos")
-    .select("*")
-    .eq("codigo", codigo);
-
-  if (error) {
-    console.log(error);
-    alert("Erro ao buscar");
-    return;
-  }
-
-  const tabela = document.getElementById("tabela");
-  tabela.innerHTML = "";
-  mostrarImagemGrande("", []);
-
-  if (!data || data.length === 0) {
-    tabela.innerHTML = "<tr><td colspan='6'>Nenhum resultado</td></tr>";
-    return;
-  }
-
-  data.forEach(p => {
-    tabela.innerHTML += `
-      <tr>
-        <td>${miniatura(normalizarImagens(p.imagens, p.imagem_url)[0] || "")}</td>
-        <td>${p.codigo}</td>
-        <td>${p.descricao}</td>
-        <td>${p.numero_caixa}</td>
-        <td>${p.qtde_caixa}</td>
-        <td>
-          <button onclick="editarPelaConsulta(${p.id})">Editar</button>
-        </td>
-      </tr>`;
-  });
-
-  mostrarImagemGrande(normalizarImagens(data[0].imagens, data[0].imagem_url)[0] || "", normalizarImagens(data[0].imagens, data[0].imagem_url));
-}
-
-async function editarPelaConsulta(id){
-  await editar(id);
-  irPara("cadastro");
-}
-
-async function calcular() {
-  const codigo = document.getElementById("busca").value;
-  const qtd = Number(document.getElementById("quantidade").value);
-
-  const { data, error } = await supa
-    .from("produtos")
-    .select("*")
-    .eq("codigo", codigo)
-    .maybeSingle();
-
-  if (error || !data) {
-    alert("Produto não encontrado");
-    return;
-  }
-
-  const caixas = Math.floor(qtd / data.qtde_caixa);
-  const resto = qtd % data.qtde_caixa;
-
-  let txt = caixas + " caixas";
-
-  if (resto > 0) {
-    txt += " + 1 aberta (" + resto + ")";
-  }
-
-  document.getElementById("resultado-calculo").textContent = txt;
-  mostrarImagemGrande(normalizarImagens(data.imagens, data.imagem_url)[0] || "", normalizarImagens(data.imagens, data.imagem_url));
-}
-
-async function salvar() {
-  const id = document.getElementById("produto-id").value;
-
-  let todasImagens = [];
-
-  try{
-    todasImagens = await uploadImagensProduto();
-  }catch(e){
-    alert("Erro ao enviar imagem");
-    return;
-  }
-
-  const imagemPrincipal = todasImagens[0] || "";
-
-  const dados = {
-    codigo: document.getElementById("codigo").value,
-    descricao: document.getElementById("descricao").value,
-    numero_caixa: document.getElementById("numero_caixa").value,
-    qtde_caixa: document.getElementById("qtde_caixa").value,
-    imagem_url: imagemPrincipal,
-    imagens: imagensParaBanco(todasImagens)
-  };
-
-  let error;
-
-  if (id) {
-    ({ error } = await supa
-      .from("produtos")
-      .update(dados)
-      .eq("id", id));
-  } else {
-    ({ error } = await supa
-      .from("produtos")
-      .insert([dados]));
-  }
-
-  if (error) {
-    console.log(error);
-    alert("Erro ao salvar produto");
-    return;
-  }
-
-  alert("Produto salvo com sucesso!");
-  limpar();
-  carregarLista();
-}
-
-async function carregarLista() {
-  const { data, error } = await supa
-    .from("produtos")
-    .select("*")
-    .order("id", { ascending: false });
-
-  if (error) {
-    console.log(error);
-    return;
-  }
-
-  const lista = document.getElementById("lista-produtos");
-  lista.innerHTML = "";
-
-  data.forEach(p => {
-    lista.innerHTML += `
-      <tr>
-        <td>${miniatura(normalizarImagens(p.imagens, p.imagem_url)[0] || "")}</td>
-        <td>${p.codigo}</td>
-        <td>${p.descricao}</td>
-        <td>
-          <button onclick="editar(${p.id})">Editar</button>
-          <button onclick="excluir(${p.id})">Excluir</button>
-        </td>
-      </tr>`;
-  });
-}
-
-async function editar(id) {
-  const { data } = await supa
-    .from("produtos")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
-
-  document.getElementById("produto-id").value = data.id;
-  document.getElementById("codigo").value = data.codigo;
-  document.getElementById("descricao").value = data.descricao;
-  document.getElementById("numero_caixa").value = data.numero_caixa;
-  document.getElementById("qtde_caixa").value = data.qtde_caixa;
-
-  imagensAtuais = normalizarImagens(data.imagens, data.imagem_url);
-  imagensSelecionadas = [];
-
-  atualizarPreviewImagens();
-}
-
-async function excluir(id) {
-  if (!confirm("Excluir produto?")) return;
-
-  const { error } = await supa
-    .from("produtos")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    console.log(error);
-    alert("Erro ao excluir produto");
-    return;
-  }
-
-  carregarLista();
-}
-
-function limpar() {
-  document.getElementById("produto-id").value = "";
-  document.getElementById("codigo").value = "";
-  document.getElementById("descricao").value = "";
-  document.getElementById("numero_caixa").value = "";
-  document.getElementById("qtde_caixa").value = "";
-
-  imagensSelecionadas = [];
-  imagensAtuais = [];
-
-  document.getElementById("input-galeria").value = "";
-  document.getElementById("input-camera").value = "";
-  document.getElementById("preview-foto").innerHTML = "+";
-  document.getElementById("galeria-preview").innerHTML = "";
-}
-
-async function carregarUsuarios() {
-  const { data, error } = await supa
-    .from("usuarios")
-    .select("*")
-    .order("id", { ascending: false });
-
-  if (error) {
-    console.log(error);
-    return;
-  }
-
-  const lista = document.getElementById("lista-usuarios");
-  lista.innerHTML = "";
-
-  data.forEach(u => {
-    lista.innerHTML += `
-      <tr>
-        <td>${u.username}</td>
-        <td>${u.role}</td>
-        <td>
-          <button onclick="editarUsuario(${u.id})">Editar</button>
-          <button onclick="excluirUsuario(${u.id})">Excluir</button>
-        </td>
-      </tr>`;
-  });
-}
-
-async function salvarUsuario() {
-  const id = document.getElementById("usuario-id").value;
-
-  const dados = {
-    username: document.getElementById("novo-user").value,
-    senha: document.getElementById("nova-senha").value,
-    role: document.getElementById("role").value
-  };
-
-  let error;
-
-  if (id) {
-    ({ error } = await supa
-      .from("usuarios")
-      .update(dados)
-      .eq("id", id));
-  } else {
-    ({ error } = await supa
-      .from("usuarios")
-      .insert([dados]));
-  }
-
-  if (error) {
-    console.log(error);
-    alert("Erro ao salvar usuário");
-    return;
-  }
-
-  alert("Usuário salvo com sucesso!");
-  limparUsuario();
-  carregarUsuarios();
-}
-
-async function editarUsuario(id) {
-  const { data } = await supa
-    .from("usuarios")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
-
-  document.getElementById("usuario-id").value = data.id;
-  document.getElementById("novo-user").value = data.username;
-  document.getElementById("nova-senha").value = data.senha;
-  document.getElementById("role").value = data.role;
-}
-
-async function excluirUsuario(id) {
-  if (!confirm("Excluir usuário?")) return;
-
-  const { error } = await supa
-    .from("usuarios")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    console.log(error);
-    alert("Erro ao excluir usuário");
-    return;
-  }
-
-  carregarUsuarios();
-}
-
-function limparUsuario() {
-  document.getElementById("usuario-id").value = "";
-  document.getElementById("novo-user").value = "";
-  document.getElementById("nova-senha").value = "";
-  document.getElementById("role").value = "user";
-}
+const supa=supabase.createClient('https://gymyltthcegplqzbujrv.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd5bXlsdHRoY2VncGxxemJ1anJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2OTg4NDcsImV4cCI6MjA5MjI3NDg0N30.mTIIKj1E6jMuAo1ZlQDAGOnNraXC5hjLQPqfHG6Aoaw');
+let usuarioLogado=null,historicoAtual=[],imagensAtuais=[],imagensSelecionadas=[];
+const idsSecoes=['consulta','cadastro','registro','historico','balanceamento','usuarios','print-card'];
+function numero(v){return Number(v||0)}function fmt(v){return numero(v).toLocaleString('pt-BR',{maximumFractionDigits:2})}function hoje(){return new Date().toISOString().slice(0,10)}function mes3(d){if(!d)return'';return ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'][new Date(d+'T00:00:00').getMonth()]||''}function esc(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}function limparCampos(ids){ids.forEach(id=>{const e=document.getElementById(id);if(e)e.value=''})}
+function temEncaix(){return !!usuarioLogado&&(usuarioLogado.role==='admin'||usuarioLogado.acesso_encaixotamento!==false)}function temProducao(){return !!usuarioLogado&&(usuarioLogado.role==='admin'||usuarioLogado.acesso_producao===true)}
+async function fazerLogin(){const b=document.querySelector('.login-box button');b.disabled=true;b.textContent='Entrando...';const username=document.getElementById('login-username').value.trim(),senha=document.getElementById('login-password').value.trim();const {data,error}=await supa.from('usuarios').select('*').eq('username',username).eq('senha',senha).maybeSingle();b.disabled=false;b.textContent='Entrar';if(error||!data){console.log(error);alert('Login inválido.');return}usuarioLogado=data;document.getElementById('login').classList.add('hidden');document.getElementById('menu').style.display='flex';document.getElementById('user-info').innerHTML='Logado: <b>'+esc(data.username)+'</b><br>Tipo: '+esc(data.role);document.getElementById('menu-encaixotamento').classList.toggle('hidden',!temEncaix());document.getElementById('menu-producao').classList.toggle('hidden',!temProducao());document.getElementById('menu-admin').classList.toggle('hidden',data.role!=='admin');document.getElementById('data-hoje-label').textContent='Hoje: '+hoje();if(temEncaix())irPara('consulta');else if(temProducao())irPara('registro');else alert('Este usuário ainda não possui acesso a nenhum módulo.')}
+function logout(){location.reload()}
+function secaoPermitida(s){if(['consulta','cadastro'].includes(s))return temEncaix();if(['registro','historico','balanceamento'].includes(s))return temProducao();if(s==='usuarios')return usuarioLogado&&usuarioLogado.role==='admin';return true}
+function irPara(secao){if(!usuarioLogado||!secaoPermitida(secao)){alert('Você não possui acesso a este módulo.');return}idsSecoes.forEach(id=>document.getElementById(id).classList.add('hidden'));document.getElementById(secao).classList.remove('hidden');document.querySelectorAll('.sidebar button').forEach(b=>b.classList.remove('ativo'));const bt=document.getElementById('btn-'+secao);if(bt)bt.classList.add('ativo');if(secao==='cadastro')carregarProdutosUnificados();if(secao==='usuarios')carregarUsuarios();if(secao==='historico')pesquisarHistorico();if(secao==='balanceamento')carregarBalanceamento();if(secao==='registro'&&!document.getElementById('ent-data').value){document.getElementById('ent-data').value=hoje();atualizarMesRegistro()}}
+function normalizarImagens(v,url){let a=[];if(Array.isArray(v))a=v;else if(typeof v==='string'&&v.trim()){try{const x=JSON.parse(v);a=Array.isArray(x)?x:[v]}catch{a=[v]}}if(url&&!a.includes(url))a.unshift(url);return a.filter(Boolean)}function imagensParaBanco(a){return JSON.stringify((a||[]).filter(Boolean))}function miniatura(url){return url?`<img class="thumb" src="${esc(url)}">`:'<div class="sem-foto">+</div>'}
+function abrirModalFoto(){document.getElementById('modal-foto').style.display='flex'}function fecharModalFoto(){document.getElementById('modal-foto').style.display='none'}function abrirGaleria(){fecharModalFoto();document.getElementById('prod-input-galeria').click()}function abrirCamera(){fecharModalFoto();document.getElementById('prod-input-camera').click()}
+function selecionarImagens(e){const ar=Array.from(e.target.files||[]);imagensSelecionadas=imagensSelecionadas.concat(ar);renderPreviewFotos()}
+function renderPreviewFotos(){const box=document.getElementById('prod-preview'),gal=document.getElementById('prod-galeria-preview');const todos=imagensAtuais.map(v=>({tipo:'url',valor:v})).concat(imagensSelecionadas.map(v=>({tipo:'file',valor:v})));gal.innerHTML='';if(!todos.length){box.innerHTML='+';return}const src0=todos[0].tipo==='url'?todos[0].valor:URL.createObjectURL(todos[0].valor);box.innerHTML=`<img src="${src0}">`;todos.forEach((it,i)=>{const src=it.tipo==='url'?it.valor:URL.createObjectURL(it.valor);gal.innerHTML+=`<div class="galeria-item"><img src="${src}"><button onclick="removerFoto(${i})">×</button></div>`})}
+function removerFoto(i){if(i<imagensAtuais.length)imagensAtuais.splice(i,1);else imagensSelecionadas.splice(i-imagensAtuais.length,1);renderPreviewFotos()}
+async function uploadImagem(file){const ext=(file.name.split('.').pop()||'jpg').toLowerCase(),nome='produto_'+Date.now()+'_'+Math.random().toString(36).slice(2)+'.'+ext;const {error}=await supa.storage.from('produtos').upload(nome,file,{cacheControl:'3600',upsert:true});if(error)throw error;return supa.storage.from('produtos').getPublicUrl(nome).data.publicUrl}
+async function obterTodasImagens(){const novas=[];for(const f of imagensSelecionadas)novas.push(await uploadImagem(f));return imagensAtuais.concat(novas)}
+function mostrarGaleriaProduto(imagens){const imgs=(imagens||[]).filter(Boolean),box=document.getElementById('enc-imagem-grande'),gal=document.getElementById('enc-galeria');gal.innerHTML='';if(!imgs.length){box.style.display='none';box.innerHTML='';return}box.style.display='block';box.innerHTML=`<img src="${imgs[0]}">`;imgs.forEach((img,i)=>gal.innerHTML+=`<img class="${i===0?'ativa':''}" src="${img}" onclick="trocarFotoConsulta('${img}',this)">`)}function trocarFotoConsulta(url,el){document.getElementById('enc-imagem-grande').innerHTML=`<img src="${url}">`;document.querySelectorAll('#enc-galeria img').forEach(i=>i.classList.remove('ativa'));el.classList.add('ativa')}
+async function buscarEncaixotamento(){const codigo=document.getElementById('enc-busca').value.trim();const {data,error}=await supa.from('produtos').select('*').eq('codigo',codigo);if(error){console.log(error);alert('Erro ao buscar produto.');return}const t=document.getElementById('enc-tabela');t.innerHTML='';document.getElementById('enc-resultado').classList.add('hidden');if(!data||!data.length){t.innerHTML='<tr><td colspan="6">Produto não encontrado.</td></tr>';mostrarGaleriaProduto([]);return}data.forEach(p=>{const imgs=normalizarImagens(p.imagens,p.imagem_url);t.innerHTML+=`<tr><td>${miniatura(imgs[0])}</td><td>${esc(p.codigo)}</td><td>${esc(p.descricao)}</td><td>${esc(p.numero_caixa||'')}</td><td>${esc(p.qtde_caixa||'')}</td><td><button onclick="editarProdutoPelaConsulta('${p.id}')">Editar</button></td></tr>`});mostrarGaleriaProduto(normalizarImagens(data[0].imagens,data[0].imagem_url))}
+async function calcularCaixas(){const codigo=document.getElementById('enc-busca').value.trim(),qtd=numero(document.getElementById('enc-quantidade').value);if(!codigo||qtd<=0){alert('Informe código e quantidade.');return}const {data,error}=await supa.from('produtos').select('*').eq('codigo',codigo).maybeSingle();if(error||!data){alert('Produto não encontrado.');return}const por=numero(data.qtde_caixa);if(por<=0){alert('Este produto não possui quantidade por caixa cadastrada.');return}const fechadas=Math.floor(qtd/por),resto=qtd%por;let txt=fechadas+' caixa'+(fechadas===1?' fechada':'s fechadas');if(resto>0)txt+=' + 1 caixa aberta ('+fmt(resto)+' unidades)';const r=document.getElementById('enc-resultado');r.textContent='Quantidade de caixas: '+txt;r.classList.remove('hidden');mostrarGaleriaProduto(normalizarImagens(data.imagens,data.imagem_url))}
+async function editarProdutoPelaConsulta(id){irPara('cadastro');await editarProdutoUnificado(id)}
+async function salvarProdutoUnificado(){const id=document.getElementById('prod-id').value,dadosBase={codigo:document.getElementById('prod-codigo').value.trim(),descricao:document.getElementById('prod-descricao').value.trim(),numero_caixa:document.getElementById('prod-numero-caixa').value.trim()||null,qtde_caixa:document.getElementById('prod-qtde-caixa').value?numero(document.getElementById('prod-qtde-caixa').value):null,categoria:document.getElementById('prod-categoria').value.trim()||null,status:document.getElementById('prod-status').value};if(!dadosBase.codigo||!dadosBase.descricao){alert('Preencha código e descrição.');return}let imagens;try{imagens=await obterTodasImagens()}catch(e){console.log(e);alert('Erro ao enviar as fotos. Verifique o bucket produtos.');return}const dados={...dadosBase,imagem_url:imagens[0]||null,imagens:imagensParaBanco(imagens)};let error;if(id)({error}=await supa.from('produtos').update(dados).eq('id',id));else{const existente=await supa.from('produtos').select('id').eq('codigo',dados.codigo).maybeSingle();if(existente.data){alert('Já existe um produto com esse código. Use Editar.');return}({error}=await supa.from('produtos').insert([dados]))}if(error){console.log(error);alert('Erro ao salvar produto.');return}alert('Produto salvo com sucesso!');limparProdutoUnificado();carregarProdutosUnificados()}
+async function carregarProdutosUnificados(){const {data,error}=await supa.from('produtos').select('*').order('codigo');if(error){console.log(error);alert('Erro ao carregar produtos.');return}const l=document.getElementById('prod-lista');l.innerHTML='';if(!data||!data.length){l.innerHTML='<tr><td colspan="8">Nenhum produto.</td></tr>';return}data.forEach(p=>{const imgs=normalizarImagens(p.imagens,p.imagem_url);l.innerHTML+=`<tr><td>${miniatura(imgs[0])}</td><td>${esc(p.codigo)}</td><td>${esc(p.descricao)}</td><td>${esc(p.numero_caixa||'')}</td><td>${esc(p.qtde_caixa||'')}</td><td>${esc(p.categoria||'')}</td><td><span class="pill">${esc(p.status||'Ativo')}</span></td><td><button onclick="editarProdutoUnificado('${p.id}')">Editar</button><button class="btn-danger" onclick="excluirProdutoUnificado('${p.id}')">Excluir</button></td></tr>`})}
+async function editarProdutoUnificado(id){const {data,error}=await supa.from('produtos').select('*').eq('id',id).maybeSingle();if(error||!data){alert('Produto não encontrado.');return}document.getElementById('prod-id').value=data.id;document.getElementById('prod-codigo').value=data.codigo||'';document.getElementById('prod-descricao').value=data.descricao||'';document.getElementById('prod-numero-caixa').value=data.numero_caixa||'';document.getElementById('prod-qtde-caixa').value=data.qtde_caixa??'';document.getElementById('prod-categoria').value=data.categoria||'';document.getElementById('prod-status').value=data.status||'Ativo';imagensAtuais=normalizarImagens(data.imagens,data.imagem_url);imagensSelecionadas=[];renderPreviewFotos();window.scrollTo({top:0,behavior:'smooth'})}
+async function excluirProdutoUnificado(id){if(usuarioLogado.role!=='admin'){alert('Somente administrador pode excluir produtos.');return}if(!confirm('Excluir este produto?'))return;const {error}=await supa.from('produtos').delete().eq('id',id);if(error){console.log(error);alert('Erro ao excluir. O produto pode estar vinculado a registros.');return}carregarProdutosUnificados()}
+function limparProdutoUnificado(){limparCampos(['prod-id','prod-codigo','prod-descricao','prod-numero-caixa','prod-qtde-caixa','prod-categoria']);document.getElementById('prod-status').value='Ativo';imagensAtuais=[];imagensSelecionadas=[];document.getElementById('prod-input-galeria').value='';document.getElementById('prod-input-camera').value='';renderPreviewFotos()}
+function alternarLoteInterno(){const ativo=document.getElementById('ent-usar-lote-interno').checked;document.getElementById('ent-lote-interno-area').classList.toggle('hidden',!ativo);if(!ativo)document.getElementById('ent-lote-interno').value=''}function atualizarMesRegistro(){document.getElementById('ent-mes').value=mes3(document.getElementById('ent-data').value)}
+async function buscarProdutoRegistro(){const codigo=document.getElementById('ent-codigo').value.trim();if(!codigo)return;const {data,error}=await supa.from('produtos').select('*').eq('codigo',codigo).maybeSingle();if(error||!data){document.getElementById('ent-descricao').value='';alert('Produto não encontrado na tabela única.');return}if(data.status&&data.status!=='Ativo')alert('Este produto está inativo.');document.getElementById('ent-descricao').value=data.descricao||''}
+async function salvarEntrada(){const id=document.getElementById('ent-id').value,dados={codigo:document.getElementById('ent-codigo').value.trim(),descricao:document.getElementById('ent-descricao').value.trim(),numero_pedido:document.getElementById('ent-pedido').value.trim()||null,numero_op:document.getElementById('ent-op').value.trim()||null,lote:document.getElementById('ent-lote').value.trim()||null,lote_interno:document.getElementById('ent-usar-lote-interno').checked?(document.getElementById('ent-lote-interno').value.trim()||null):null,quantidade:numero(document.getElementById('ent-qt').value),tipo_entrada:document.getElementById('ent-tipo').value,data_entrada:document.getElementById('ent-data').value,mes:document.getElementById('ent-mes').value,responsavel:usuarioLogado.username};if(!dados.codigo||!dados.descricao||dados.quantidade<=0||!dados.data_entrada){alert('Preencha código, descrição, quantidade e data.');return}let error;if(id)({error}=await supa.from('entradas_producao').update(dados).eq('id',id));else({error}=await supa.from('entradas_producao').insert([dados]));if(error){console.log(error);alert('Erro ao salvar registro. Execute o SQL de unificação primeiro.');return}alert('Registro salvo!');limparEntrada()}
+function limparEntrada(){limparCampos(['ent-id','ent-codigo','ent-descricao','ent-pedido','ent-op','ent-lote','ent-lote-interno','ent-qt']);document.getElementById('ent-usar-lote-interno').checked=false;alternarLoteInterno();document.getElementById('ent-tipo').value='Entrada cheia';document.getElementById('ent-data').value=hoje();atualizarMesRegistro()}
+async function editarEntrada(id){const {data,error}=await supa.from('entradas_producao').select('*').eq('id',id).maybeSingle();if(error||!data){alert('Registro não encontrado.');return}irPara('registro');document.getElementById('ent-id').value=data.id;document.getElementById('ent-codigo').value=data.codigo||'';document.getElementById('ent-descricao').value=data.descricao||'';document.getElementById('ent-pedido').value=data.numero_pedido||'';document.getElementById('ent-op').value=data.numero_op||'';document.getElementById('ent-lote').value=data.lote||'';document.getElementById('ent-qt').value=data.quantidade||'';document.getElementById('ent-tipo').value=data.tipo_entrada||'Entrada cheia';document.getElementById('ent-data').value=data.data_entrada||hoje();document.getElementById('ent-mes').value=data.mes||mes3(data.data_entrada);document.getElementById('ent-usar-lote-interno').checked=!!data.lote_interno;alternarLoteInterno();document.getElementById('ent-lote-interno').value=data.lote_interno||''}
+async function excluirEntrada(id){if(usuarioLogado.role!=='admin'){alert('Somente administrador pode excluir.');return}if(!confirm('Excluir registro?'))return;const {error}=await supa.from('entradas_producao').delete().eq('id',id);if(error){console.log(error);alert('Erro ao excluir.');return}pesquisarHistorico()}
+async function pesquisarHistorico(){let q=supa.from('entradas_producao').select('*').order('data_entrada',{ascending:false}).order('created_at',{ascending:false});const filtros={di:document.getElementById('hist-inicio').value,df:document.getElementById('hist-fim').value,codigo:document.getElementById('hist-codigo').value.trim(),nome:document.getElementById('hist-nome').value.trim(),pedido:document.getElementById('hist-pedido').value.trim(),op:document.getElementById('hist-op').value.trim(),lote:document.getElementById('hist-lote').value.trim(),li:document.getElementById('hist-lote-interno').value.trim()};if(filtros.di)q=q.gte('data_entrada',filtros.di);if(filtros.df)q=q.lte('data_entrada',filtros.df);if(filtros.codigo)q=q.eq('codigo',filtros.codigo);if(filtros.nome)q=q.ilike('descricao','%'+filtros.nome+'%');if(filtros.pedido)q=q.ilike('numero_pedido','%'+filtros.pedido+'%');if(filtros.op)q=q.ilike('numero_op','%'+filtros.op+'%');if(filtros.lote)q=q.ilike('lote','%'+filtros.lote+'%');if(filtros.li)q=q.ilike('lote_interno','%'+filtros.li+'%');const {data,error}=await q;if(error){console.log(error);alert('Erro ao pesquisar histórico.');return}historicoAtual=data||[];renderHistorico()}
+function renderHistorico(){const l=document.getElementById('hist-lista');l.innerHTML='';if(!historicoAtual.length)l.innerHTML='<tr><td colspan="12">Nenhum registro.</td></tr>';historicoAtual.forEach(r=>{const ac=`<button onclick="editarEntrada('${r.id}')">Editar</button>${usuarioLogado.role==='admin'?`<button class="btn-danger" onclick="excluirEntrada('${r.id}')">Excluir</button>`:''}`;l.innerHTML+=`<tr><td>${esc(r.data_entrada)}</td><td>${esc(r.mes||mes3(r.data_entrada))}</td><td>${esc(r.codigo)}</td><td>${esc(r.descricao)}</td><td>${esc(r.numero_pedido||'')}</td><td>${esc(r.numero_op||'')}</td><td>${esc(r.lote||'')}</td><td>${esc(r.lote_interno||'')}</td><td>${fmt(r.quantidade)}</td><td>${esc(r.tipo_entrada||'')}</td><td>${esc(r.responsavel||'')}</td><td>${ac}</td></tr>`});document.getElementById('total-fichas').textContent=historicoAtual.length;document.getElementById('total-quantidade').textContent=fmt(historicoAtual.reduce((s,x)=>s+numero(x.quantidade),0));document.getElementById('total-produtos').textContent=new Set(historicoAtual.map(x=>x.codigo)).size;document.getElementById('total-parcial').textContent=historicoAtual.filter(x=>x.tipo_entrada==='Entrada parcial').length}
+function limparHistorico(){limparCampos(['hist-inicio','hist-fim','hist-codigo','hist-nome','hist-pedido','hist-op','hist-lote','hist-lote-interno']);historicoAtual=[];renderHistorico()}
+function imprimirHistorico(){if(!historicoAtual.length){alert('Pesquise primeiro.');return}let linhas='';historicoAtual.forEach(r=>linhas+=`<tr><td>${esc(r.data_entrada)}</td><td>${esc(r.codigo)}</td><td>${esc(r.descricao)}</td><td>${esc(r.numero_pedido||'')}</td><td>${esc(r.numero_op||'')}</td><td>${esc(r.lote||'')}</td><td>${esc(r.lote_interno||'')}</td><td>${fmt(r.quantidade)}</td><td>${esc(r.tipo_entrada||'')}</td><td>${esc(r.responsavel||'')}</td></tr>`);document.getElementById('print-area').innerHTML=`<h2 style="text-align:center">SOFISTICATTO - RELATÓRIO DE PRODUÇÃO</h2><table><thead><tr><th>Data</th><th>Código</th><th>Descrição</th><th>Pedido</th><th>OP</th><th>Lote</th><th>Lote interno</th><th>Qt</th><th>Tipo</th><th>Resp.</th></tr></thead><tbody>${linhas}</tbody></table>`;document.getElementById('print-card').classList.remove('hidden');window.print();setTimeout(()=>document.getElementById('print-card').classList.add('hidden'),500)}
+async function carregarBalanceamento(){const di=document.getElementById('bal-inicio').value,df=document.getElementById('bal-fim').value,termo=document.getElementById('bal-termo').value.trim().toLowerCase();let q=supa.from('entradas_producao').select('*');if(di)q=q.gte('data_entrada',di);if(df)q=q.lte('data_entrada',df);const {data,error}=await q;if(error){console.log(error);alert('Erro ao carregar ranking.');return}const m=new Map();(data||[]).forEach(x=>{if(termo&&!(String(x.codigo||'').toLowerCase().includes(termo)||String(x.descricao||'').toLowerCase().includes(termo)))return;const k=x.codigo+'|'+x.descricao;if(!m.has(k))m.set(k,{codigo:x.codigo,descricao:x.descricao,q:0});m.get(k).q+=numero(x.quantidade)});const a=[...m.values()].sort((x,y)=>y.q-x.q),max=a[0]?.q||0,total=a.reduce((s,x)=>s+x.q,0);document.getElementById('bal-lider').textContent=a[0]?.descricao||'-';document.getElementById('bal-qtd').textContent=fmt(a[0]?.q||0);document.getElementById('bal-total').textContent=fmt(total);document.getElementById('bal-count').textContent=a.length;const l=document.getElementById('bal-lista');l.innerHTML='';if(!a.length){l.innerHTML='<tr><td colspan="5">Nenhum resultado.</td></tr>';return}a.forEach((r,i)=>{const rank=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'º',pct=max?r.q/max*100:0;l.innerHTML+=`<tr><td>${rank}</td><td>${esc(r.codigo)}</td><td>${esc(r.descricao)}</td><td><b>${fmt(r.q)}</b></td><td><div class="bar-area"><div class="bar" style="width:${pct}%"></div></div></td></tr>`})}
+function limparBalanceamento(){limparCampos(['bal-inicio','bal-fim','bal-termo']);carregarBalanceamento()}
+async function carregarUsuarios(){if(usuarioLogado.role!=='admin'){return}const {data,error}=await supa.from('usuarios').select('*').order('id',{ascending:false});if(error){console.log(error);alert('Erro ao carregar usuários.');return}const l=document.getElementById('user-lista');l.innerHTML='';(data||[]).forEach(u=>l.innerHTML+=`<tr><td>${esc(u.username)}</td><td>${esc(u.role)}</td><td>${u.role==='admin'||u.acesso_encaixotamento!==false?'✅':'—'}</td><td>${u.role==='admin'||u.acesso_producao===true?'✅':'—'}</td><td><button onclick="editarUsuario('${u.id}')">Editar</button><button class="btn-danger" onclick="excluirUsuario('${u.id}')">Excluir</button></td></tr>`)}
+async function salvarUsuario(){const id=document.getElementById('user-id').value,role=document.getElementById('user-role').value,dados={username:document.getElementById('user-username').value.trim(),senha:document.getElementById('user-senha').value.trim(),role,acesso_encaixotamento:role==='admin'?true:document.getElementById('user-acesso-encaixotamento').checked,acesso_producao:role==='admin'?true:document.getElementById('user-acesso-producao').checked};if(!dados.username||!dados.senha){alert('Preencha usuário e senha.');return}let error;if(id)({error}=await supa.from('usuarios').update(dados).eq('id',id));else({error}=await supa.from('usuarios').insert([dados]));if(error){console.log(error);alert('Erro ao salvar usuário.');return}alert('Usuário salvo!');limparUsuario();carregarUsuarios()}
+async function editarUsuario(id){const {data,error}=await supa.from('usuarios').select('*').eq('id',id).maybeSingle();if(error||!data){alert('Usuário não encontrado.');return}document.getElementById('user-id').value=data.id;document.getElementById('user-username').value=data.username||'';document.getElementById('user-senha').value=data.senha||'';document.getElementById('user-role').value=data.role||'user';document.getElementById('user-acesso-encaixotamento').checked=data.role==='admin'||data.acesso_encaixotamento!==false;document.getElementById('user-acesso-producao').checked=data.role==='admin'||data.acesso_producao===true}
+async function excluirUsuario(id){if(String(id)===String(usuarioLogado.id)){alert('Você não pode excluir o usuário que está logado.');return}if(!confirm('Excluir usuário?'))return;const {error}=await supa.from('usuarios').delete().eq('id',id);if(error){console.log(error);alert('Erro ao excluir.');return}carregarUsuarios()}
+function limparUsuario(){limparCampos(['user-id','user-username','user-senha']);document.getElementById('user-role').value='user';document.getElementById('user-acesso-encaixotamento').checked=true;document.getElementById('user-acesso-producao').checked=false}
+document.getElementById('ent-data').value=hoje();atualizarMesRegistro();limparUsuario();
 </script>
-
 </body>
 </html>
